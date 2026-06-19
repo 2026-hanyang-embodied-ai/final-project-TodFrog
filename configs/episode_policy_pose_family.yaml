@@ -1,0 +1,16 @@
+model_profile: tcn_pose_family_clear50
+profile_path: results/model_profiles/tcn_pose_family_clear50.json
+dataset_path: data/synthetic/rps_pose_family_dataset.npz
+hand_config_path: configs/kinematic_rps.yaml
+split: test
+device: auto
+confidence_threshold: 0.90
+confidence_margin: 0.0
+confirmation_count: 1
+observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 1.00]
+deadline_s: 0.50
+actuator_velocity_scale: 4.0
+response_delay_s:
+log_path: logs/episode_policy_pose_family.jsonl
+summary_path: results/episode_policy_pose_family_summary.json
+max_episodes:

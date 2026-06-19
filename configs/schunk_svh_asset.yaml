@@ -1,0 +1,27 @@
+﻿source:
+  repository_url: https://github.com/dexsuite/dex-urdf.git
+  revision: main
+  sparse_path: robots/hands/schunk_hand
+  local_root: third_party/dex-urdf
+
+asset:
+  hand: right
+  license_path: robots/hands/schunk_hand/LICENSE
+  urdf_candidates:
+    - robots/hands/schunk_hand/schunk_svh_hand_right_glb.urdf
+    - robots/hands/schunk_hand/schunk_svh_hand_right.urdf
+
+expected:
+  revolute_joints: 20
+  total_joints: 28
+
+output:
+  audit_json: results/schunk_svh_asset_audit.json
+  joint_schema_json: results/schunk_svh_joint_schema.json
+  skeleton_schema_json: results/schunk_svh_skeleton_schema.json
+  isaac_import_json: results/schunk_svh_isaac_import_smoke.json
+  usd_output_dir: sim/isaac/schunk_svh
+
+isaac:
+  docker_image: nvcr.io/nvidia/isaac-sim:6.0.0-dev2
+  cache_root: /home/voice/workspace/chominkyu/embodied-final/.isaac-cache

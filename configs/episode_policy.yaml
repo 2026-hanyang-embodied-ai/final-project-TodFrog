@@ -1,0 +1,14 @@
+model_profile: gru_clear50
+profile_path: results/model_profiles/gru_clear50.json
+dataset_path: data/synthetic/rps_skeleton_dataset.npz
+hand_config_path: configs/kinematic_rps.yaml
+split: test
+device: auto
+confidence_threshold: 0.80
+observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+deadline_s: 0.50
+actuator_velocity_scale: 1.0
+response_delay_s:
+log_path: logs/episode_policy.jsonl
+summary_path: results/episode_policy_summary.json
+max_episodes:

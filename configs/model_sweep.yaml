@@ -1,0 +1,27 @@
+dataset_path: data/synthetic/rps_skeleton_dataset.npz
+runs_dir: results/model_runs
+comparison_path: results/model_comparison.json
+device: auto
+batch_size: 64
+learning_rate: 0.003
+epochs: 5
+smoke_epochs: 1
+observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+seeds: [11, 23, 37]
+models:
+  mlp:
+    hidden_sizes: [32, 64, 128]
+    dropout: [0.0, 0.1]
+  gru:
+    hidden_sizes: [32, 64]
+    layers: [1, 2]
+    dropout: [0.0, 0.1]
+  tcn:
+    channels: [32, 64]
+    kernel_sizes: [3, 5]
+    dropout: [0.0]
+  transformer:
+    dims: [32, 64]
+    heads: [2, 4]
+    layers: [1, 2]
+    dropout: [0.0]

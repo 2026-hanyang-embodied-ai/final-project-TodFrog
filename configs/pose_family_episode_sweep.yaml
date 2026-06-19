@@ -1,0 +1,7 @@
+policy_config: configs/episode_policy_pose_family.yaml
+thresholds: [0.50, 0.55, 0.60, 0.65, 0.70, 0.80, 0.90]
+actuator_velocity_scales: [3.0, 4.0]
+confidence_margins: [0.0, 0.25, 0.40]
+confirmation_counts: [1, 2]
+log_dir: logs/pose_family_episode_sweep
+output_path: results/pose_family_episode_sweep.json

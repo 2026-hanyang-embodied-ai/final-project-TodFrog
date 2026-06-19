@@ -1,0 +1,33 @@
+profiles:
+  - results/model_profiles/real_skeleton_three_class_wait_v4_fewshot_aug_tcn.json
+  - results/model_profiles/real_skeleton_three_class_wait_v4_rebalanced_tcn.json
+  - results/model_profiles/real_skeleton_three_class_wait_v4_final_gate_micro.json
+profile_weights: 0.25,0.75,0.0
+scissors_rescue_profile_index: 0
+scissors_rescue_confidence_threshold: 0.90
+scissors_rescue_margin_threshold: 0.98
+conditional_scissors_rescue_profile_index: 2
+conditional_scissors_rescue_confidence_threshold: 0.99
+conditional_scissors_rescue_margin_threshold: 0.98
+conditional_scissors_rescue_min_blended_transition_mass: 0.80
+conditional_scissors_rescue_max_blended_rock_probability: 0.60
+confidence_threshold: 0.70
+margin_threshold: 0.10
+confirmation_count: 2
+transition_mass_threshold: 0.05
+binary_transition_mass_threshold: 0.60
+min_binary_decision_progress: 0.05
+late_geometry_paper_min_history_frames: 20
+late_geometry_paper_min_observed_progress: 0.35
+late_geometry_paper_max_observed_progress: 0.50
+late_geometry_paper_min_ring_pinky_extension_delta: 0.04
+late_geometry_paper_min_latest_ring_pinky_extension: 0.60
+late_geometry_paper_max_index_middle_minus_ring_pinky: 0.25
+late_geometry_paper_max_index_middle_delta_minus_ring_pinky_delta: 0.08
+prompt_cycle: true
+prompt_cycle_s: 1.0
+prompt_sequence: rock,paper,scissors
+response_prompt: scissors
+reset_on_prompt_cycle: true
+reset_on_prompt_change: true
+device: auto

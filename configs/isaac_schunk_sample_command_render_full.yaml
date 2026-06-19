@@ -1,0 +1,69 @@
+asset_config: configs/schunk_svh_asset.yaml
+retargeting_config: configs/schunk_retargeting.yaml
+usd_path: sim/isaac/schunk_svh/schunk_svh_hand_right_control_no_mimic.usd/schunk_svh_hand_right/schunk_svh_hand_right.usda
+articulation_root: /svh
+required_visual_evidence: schunk_mesh_with_link_skeleton
+docker_image: nvcr.io/nvidia/isaac-sim:6.0.0-dev2
+cache_root: /home/voice/workspace/chominkyu/embodied-final/.isaac-cache
+gestures: [rock, paper, scissors]
+
+camera:
+  yaw_degrees: [45]
+  pitch_degrees: [20]
+  distance_m: 0.95
+  focal_length_mm: 32.0
+  bounds_mode: configured
+  bounds_center: [0.08, -0.02, 0.20]
+  bounds_radius_m: 0.42
+
+image:
+  width: 1280
+  height: 720
+
+output:
+  render_dir: results/isaac_schunk_sample_command_renders
+  render_plan_json: results/isaac_schunk_sample_command_renders/render_plan.json
+
+debug_overlay:
+  enabled: false
+
+procedural_visual_rig:
+  enabled: false
+
+mesh_visual_sync:
+  strategy: detached_hierarchy_fk
+  root_path: /Render/DetachedSCHUNKMesh
+  source_root: /svh/Geometry/base_link/right_hand_base_link
+  hide_original: true
+  rotation_order: pre_multiply
+  joint_angle_scale: 1.0
+  fallback_display_color: [0.42, 0.42, 0.40]
+  evidence_note: detached non-GLB SCHUNK mesh visual copy driven from URDF link hierarchy and joint targets; does not mutate physics-linked SCHUNK visual prims
+
+schunk_link_skeleton:
+  enabled: true
+  root_path: /Render/SCHUNKLinkSkeleton
+  source_root: /svh/Geometry/base_link/right_hand_base_link
+  detached_root: /Render/DetachedSCHUNKMesh
+  point_source: joint_target_kinematic_skeleton
+  display_offset: [0.00, 0.00, 0.02]
+  skeleton_scale_m: 0.30
+  joint_radius_m: 0.014
+  bone_radius_m: 0.005
+  palm_radius_m: 0.018
+  metacarpal_radius_m: 0.004
+  palm_width_m: 0.24
+  palm_depth_m: 0.05
+  palm_height_m: 0.09
+  palm_color: [0.14, 0.14, 0.13]
+  joint_color: [1.0, 1.0, 1.0]
+  evidence_note: 3D SCHUNK joint-target skeleton with palm and metacarpal connectors derived from imported SCHUNK joint groups; not a 2D overlay and not mesh-only proof
+
+sequence:
+  enabled: false
+
+sample_command_sequence:
+  enabled: true
+  job_index_csv: artifacts/real_guided_sample_render_micro_jobs_20260611/render_job_index.csv
+  yaw_degrees: [45]
+  pitch_degrees: [20]

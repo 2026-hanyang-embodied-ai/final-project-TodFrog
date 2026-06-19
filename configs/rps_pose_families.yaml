@@ -1,0 +1,68 @@
+seed: 20260605
+person_count: 60
+samples_per_label_per_person: 6
+sequence_length: 24
+train_fraction: 0.60
+val_fraction: 0.20
+labels: [rock, paper, scissors, ambiguous]
+
+output:
+  dataset_npz: data/synthetic/rps_pose_family_dataset.npz
+  metadata_json: data/synthetic/rps_pose_family_metadata.json
+  audit_json: results/pose_family_audit.json
+
+views:
+  yaw_degrees: [0, 45, 90, 135, 180, 225, 270, 315]
+  pitch_degrees: [-20, 0, 20]
+  val_yaw_degrees: [45, 225]
+  test_yaw_degrees: [135, 315]
+
+person_variation:
+  handedness: [right, left]
+  palm_width_range: [0.075, 0.110]
+  finger_length_scale_range: [0.82, 1.22]
+
+motion:
+  speed_range_s: [0.24, 0.68]
+  start_pose: fist
+  start_hold_ratio: 0.25
+  transition_onset_range: [0.20, 0.34]
+  finger_open_delay_range: [0.00, 0.10]
+  motion_style: staggered_finger_open
+  abstain_before_motion: true
+  hesitation_probability: 0.25
+  noise_std: 0.0015
+
+families:
+  rock:
+    index: [0.78, 1.00]
+    middle: [0.78, 1.00]
+    ring: [0.78, 1.00]
+    pinky: [0.78, 1.00]
+    thumb: [0.35, 0.95]
+    spread: [-0.08, 0.08]
+  paper:
+    index: [0.00, 0.22]
+    middle: [0.00, 0.22]
+    ring: [0.00, 0.22]
+    pinky: [0.00, 0.22]
+    thumb: [0.00, 0.35]
+    spread: [0.06, 0.30]
+  scissors:
+    index: [0.00, 0.22]
+    middle: [0.00, 0.22]
+    ring: [0.78, 1.00]
+    pinky: [0.78, 1.00]
+    thumb: [0.10, 0.80]
+    spread: [0.02, 0.24]
+  ambiguous:
+    index: [0.36, 0.62]
+    middle: [0.36, 0.62]
+    ring: [0.36, 0.62]
+    pinky: [0.36, 0.62]
+    thumb: [0.00, 1.00]
+    spread: [-0.02, 0.18]
+
+ambiguity:
+  extended_max: 0.35
+  flexed_min: 0.65

@@ -1,0 +1,23 @@
+dataset_root: artifacts/real_guided_two_stage_paper_scissors_v7d_real_seeded_prompt_window_guard_20260618
+runs_dir: results/real_skeleton_two_stage_paper_scissors_v7d_real_seeded_prompt_window_guard_tcn_ensemble/model_runs
+comparison_path: results/real_skeleton_two_stage_paper_scissors_v7d_real_seeded_prompt_window_guard_tcn_ensemble/model_comparison.json
+profile_dir: results/model_profiles
+best_profile: real_skeleton_two_stage_paper_scissors_v7d_real_seeded_prompt_window_guard_tcn_ensemble
+preferred_export_model: tcn
+device: auto
+batch_size: 128
+learning_rate: 0.003
+epochs: 40
+smoke_epochs: 1
+observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+training_observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+seeds: [11, 17, 23]
+models:
+  tcn:
+    channels: [64]
+    kernel_sizes: [3]
+    dropout: [0.10]
+  gru:
+    hidden_sizes: [64]
+    layers: [1]
+    dropout: [0.10]

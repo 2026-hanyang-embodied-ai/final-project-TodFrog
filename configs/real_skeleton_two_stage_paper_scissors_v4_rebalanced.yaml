@@ -1,0 +1,27 @@
+dataset_root: artifacts/real_guided_two_stage_paper_scissors_v4_rebalanced_20260615
+runs_dir: results/real_skeleton_two_stage_paper_scissors_v4_rebalanced/model_runs
+comparison_path: results/real_skeleton_two_stage_paper_scissors_v4_rebalanced/model_comparison.json
+profile_dir: results/model_profiles
+best_profile: real_skeleton_two_stage_paper_scissors_v4_rebalanced
+device: auto
+batch_size: 128
+learning_rate: 0.003
+epochs: 40
+smoke_epochs: 1
+observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+training_observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+seeds: [11]
+models:
+  gru:
+    hidden_sizes: [64]
+    layers: [1]
+    dropout: [0.10]
+  tcn:
+    channels: [64]
+    kernel_sizes: [3]
+    dropout: [0.10]
+  transformer:
+    dims: [64]
+    heads: [2]
+    layers: [1]
+    dropout: [0.10]

@@ -1,0 +1,18 @@
+profiles:
+  - results/model_profiles/real_skeleton_three_class_wait_v4_fewshot_aug_tcn.json
+  - results/model_profiles/real_skeleton_three_class_wait_v4_rebalanced_tcn.json
+profile_weights: 0.25,0.75
+scissors_rescue_profile_index: 0
+scissors_rescue_confidence_threshold: 0.90
+scissors_rescue_margin_threshold: 0.98
+confidence_threshold: 0.70
+margin_threshold: 0.10
+confirmation_count: 2
+transition_mass_threshold: 0.05
+binary_transition_mass_threshold: 0.60
+min_binary_decision_progress: 0.05
+prompt_cycle: true
+prompt_cycle_s: 1.0
+prompt_sequence: rock,paper,scissors
+reset_on_prompt_cycle: true
+device: auto

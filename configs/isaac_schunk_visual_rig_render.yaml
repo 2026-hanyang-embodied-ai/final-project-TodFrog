@@ -1,0 +1,42 @@
+asset_config: configs/schunk_svh_asset.yaml
+retargeting_config: configs/schunk_retargeting.yaml
+usd_path: sim/isaac/schunk_svh/schunk_svh_hand_right_control_no_mimic.usd/schunk_svh_hand_right/schunk_svh_hand_right.usda
+articulation_root: /svh
+docker_image: nvcr.io/nvidia/isaac-sim:6.0.0-dev2
+cache_root: /home/voice/workspace/chominkyu/embodied-final/.isaac-cache
+gestures: [rock, paper, scissors]
+
+camera:
+  yaw_degrees: [0, 45, 90]
+  pitch_degrees: [0, 20]
+  distance_m: 1.25
+  focal_length_mm: 28.0
+
+image:
+  width: 1280
+  height: 720
+
+output:
+  render_dir: results/isaac_schunk_visual_rig_renders
+  render_plan_json: results/isaac_schunk_visual_rig_renders/render_plan.json
+
+debug_overlay:
+  enabled: false
+
+procedural_visual_rig:
+  enabled: true
+  scale: 0.22
+  segment_radius: 0.014
+  joint_radius: 0.019
+  offset: [0.00, 0.00, -0.02]
+  surface_color: [0.16, 0.16, 0.15]
+  joint_color: [0.04, 0.04, 0.04]
+
+mesh_visual_sync:
+  strategy: disabled
+
+sequence:
+  enabled: true
+  frame_count: 8
+  yaw_degrees: [45]
+  pitch_degrees: [20]

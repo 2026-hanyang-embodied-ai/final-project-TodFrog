@@ -1,0 +1,81 @@
+{
+  "datasets": [
+    {
+      "name": "compact_real_guided_training_package",
+      "path": "artifacts/real_guided_training_package_20260610",
+      "role": "primary",
+      "status": "upload_ready",
+      "file_count": 16,
+      "size_bytes": 55372336,
+      "description": "Compact split-aware real-guided skeleton training package.",
+      "required_for": "small reproducibility package and dataset schema reference",
+      "drive_placeholder": "TODO: paste Google Drive URL after upload"
+    },
+    {
+      "name": "large_real_guided_sharded_dataset",
+      "path": "artifacts/real_guided_large_sharded_20260610",
+      "role": "supporting",
+      "status": "upload_ready",
+      "file_count": 28,
+      "size_bytes": 287434435,
+      "description": "Large real-skeleton-guided sharded dataset used as a base for later expansions.",
+      "required_for": "large-scale skeleton sequence experiments",
+      "drive_placeholder": "TODO: paste Google Drive URL after upload"
+    },
+    {
+      "name": "v4_final_gate_micro_dataset",
+      "path": "artifacts/real_guided_three_class_wait_expanded_v4_final_gate_micro_g1000_20260616",
+      "role": "supporting",
+      "status": "upload_ready",
+      "file_count": 43,
+      "size_bytes": 421277708,
+      "description": "Upload-ready v4 final-gate micro dataset currently present with shards.",
+      "required_for": "v4 diagnostic/final-gate profile provenance",
+      "drive_placeholder": "TODO: paste Google Drive URL after upload"
+    },
+    {
+      "name": "v7e_three_class_diagnostic_dataset",
+      "path": "artifacts/real_guided_three_class_wait_expanded_v7e_stage1_paper_transition_rescue_20260619",
+      "role": "diagnostic",
+      "status": "upload_ready",
+      "file_count": 96,
+      "size_bytes": 1654448454,
+      "description": "Full-scale v7e diagnostic three-class dataset; not promoted to live/demo.",
+      "required_for": "report diagnostics only",
+      "drive_placeholder": "TODO: paste Google Drive URL after upload"
+    },
+    {
+      "name": "v7e_stage1_rock_transition_diagnostic_dataset",
+      "path": "artifacts/real_guided_two_stage_rock_transition_v7e_stage1_paper_transition_rescue_20260619",
+      "role": "diagnostic",
+      "status": "upload_ready",
+      "file_count": 91,
+      "size_bytes": 1560978790,
+      "description": "Full-scale v7e stage1 diagnostic remap; not promoted to live/demo.",
+      "required_for": "report diagnostics only",
+      "drive_placeholder": "TODO: paste Google Drive URL after upload"
+    },
+    {
+      "name": "v4_fewshot_aug_dataset_root",
+      "path": "artifacts/real_guided_three_class_wait_expanded_v4_fewshot_aug_20260615",
+      "role": "metadata_only",
+      "status": "metadata_only",
+      "file_count": 3,
+      "size_bytes": 3558,
+      "description": "Profile metadata exists in the current root, but shard files are absent.",
+      "required_for": "v4 live profile provenance if restored from archive",
+      "drive_placeholder": "TODO: paste Google Drive URL after upload"
+    },
+    {
+      "name": "v4_rebalanced_dataset_root",
+      "path": "artifacts/real_guided_three_class_wait_expanded_v4_rebalanced_20260615",
+      "role": "metadata_only",
+      "status": "metadata_only",
+      "file_count": 4,
+      "size_bytes": 4148,
+      "description": "Profile metadata exists in the current root, but shard files are absent.",
+      "required_for": "v4 live profile provenance if restored from archive",
+      "drive_placeholder": "TODO: paste Google Drive URL after upload"
+    }
+  ]
+}

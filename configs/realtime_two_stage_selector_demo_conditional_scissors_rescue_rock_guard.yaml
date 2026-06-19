@@ -1,0 +1,52 @@
+profiles:
+  - results/model_profiles/real_skeleton_three_class_wait_v4_fewshot_aug_tcn.json
+  - results/model_profiles/real_skeleton_three_class_wait_v4_rebalanced_tcn.json
+  - results/model_profiles/real_skeleton_three_class_wait_v4_final_gate_micro.json
+profile_weights: 0.25,0.75,0.0
+scissors_rescue_profile_index: 0
+scissors_rescue_confidence_threshold: 0.90
+scissors_rescue_margin_threshold: 0.98
+conditional_scissors_rescue_profile_index: 2
+conditional_scissors_rescue_confidence_threshold: 0.99
+conditional_scissors_rescue_margin_threshold: 0.98
+conditional_scissors_rescue_min_blended_transition_mass: 0.80
+conditional_scissors_rescue_max_blended_rock_probability: 0.60
+confidence_threshold: 0.70
+margin_threshold: 0.10
+confirmation_count: 2
+transition_mass_threshold: 0.05
+binary_transition_mass_threshold: 0.60
+min_binary_decision_progress: 0.05
+late_geometry_paper_min_history_frames: 20
+late_geometry_paper_min_observed_progress: 0.35
+late_geometry_paper_max_observed_progress: 0.50
+late_geometry_paper_min_ring_pinky_extension_delta: 0.04
+late_geometry_paper_min_latest_ring_pinky_extension: 0.60
+late_geometry_paper_max_index_middle_minus_ring_pinky: 0.25
+late_geometry_paper_max_index_middle_delta_minus_ring_pinky_delta: 0.08
+rock_hold_guard_min_history_frames: 3
+rock_hold_guard_max_latest_finger_extension: 0.55
+rock_hold_guard_max_extension_delta: 0.08
+gesture_verifier_min_history_frames: 3
+gesture_verifier_rock_max_ring_pinky_extension: 0.75
+gesture_verifier_rock_max_index_middle_extension: 1.08
+gesture_verifier_rock_max_index_middle_minus_ring_pinky: 0.38
+gesture_verifier_rock_max_extension_delta: 0.20
+gesture_verifier_scissors_min_index_middle_extension: 0.85
+gesture_verifier_scissors_min_index_middle_delta: 0.04
+gesture_verifier_scissors_min_index_middle_minus_ring_pinky: 0.25
+gesture_verifier_scissors_max_ring_pinky_extension: 0.62
+gesture_verifier_paper_min_ring_pinky_extension: 0.60
+gesture_verifier_paper_min_ring_pinky_delta: 0.04
+gesture_verifier_paper_max_index_middle_minus_ring_pinky: 0.25
+prompt_cycle: true
+prompt_cycle_s: 1.0
+prompt_sequence: rock,paper,scissors
+response_prompt: scissors
+hold_response_prompt_until_decision: true
+response_hold_max_frames: 180
+stop_after_confirmed_response_decision: true
+post_decision_hold_frames: 120
+reset_on_prompt_cycle: true
+reset_on_prompt_change: true
+device: auto

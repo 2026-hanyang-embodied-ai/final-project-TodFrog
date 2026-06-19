@@ -1,0 +1,142 @@
+asset_config: configs/schunk_svh_asset.yaml
+retargeting_config: configs/schunk_retargeting.yaml
+usd_path: sim/isaac/schunk_svh/schunk_svh_hand_right_control_no_mimic.usd/schunk_svh_hand_right/schunk_svh_hand_right.usda
+articulation_root: /svh
+required_visual_evidence: schunk_mesh_with_link_skeleton
+docker_image: nvcr.io/nvidia/isaac-sim:6.0.0-dev2
+cache_root: /home/voice/workspace/chominkyu/embodied-final/.isaac-cache
+gestures: [rock, paper, scissors]
+
+camera:
+  yaw_degrees: [45]
+  pitch_degrees: [20]
+  distance_m: 0.95
+  focal_length_mm: 32.0
+  bounds_mode: configured
+  bounds_center: [0.08, -0.02, 0.20]
+  bounds_radius_m: 0.42
+
+image:
+  width: 1280
+  height: 720
+
+output:
+  render_dir: results/isaac_schunk_real_guided_motion_renders
+  render_plan_json: results/isaac_schunk_real_guided_motion_renders/render_plan.json
+
+debug_overlay:
+  enabled: false
+
+procedural_visual_rig:
+  enabled: false
+
+mesh_visual_sync:
+  strategy: detached_hierarchy_fk
+  root_path: /Render/DetachedSCHUNKMesh
+  source_root: /svh/Geometry/base_link/right_hand_base_link
+  hide_original: true
+  rotation_order: pre_multiply
+  joint_angle_scale: 1.0
+  fallback_display_color: [0.42, 0.42, 0.40]
+  evidence_note: detached non-GLB SCHUNK mesh visual copy driven from URDF link hierarchy and joint targets; does not mutate physics-linked SCHUNK visual prims
+
+schunk_link_skeleton:
+  enabled: true
+  root_path: /Render/SCHUNKLinkSkeleton
+  source_root: /svh/Geometry/base_link/right_hand_base_link
+  detached_root: /Render/DetachedSCHUNKMesh
+  point_source: joint_target_kinematic_skeleton
+  display_offset: [0.00, 0.00, 0.02]
+  skeleton_scale_m: 0.30
+  joint_radius_m: 0.014
+  bone_radius_m: 0.005
+  palm_radius_m: 0.018
+  metacarpal_radius_m: 0.004
+  palm_width_m: 0.24
+  palm_depth_m: 0.05
+  palm_height_m: 0.09
+  palm_color: [0.14, 0.14, 0.13]
+  joint_color: [1.0, 1.0, 1.0]
+  evidence_note: 3D SCHUNK joint-target skeleton with palm and metacarpal connectors derived from imported SCHUNK joint groups; not a 2D overlay and not mesh-only proof
+
+sequence:
+  enabled: true
+  start_pose: rock
+  frame_count: 32
+  yaw_degrees: [45]
+  pitch_degrees: [20]
+  transitions:
+    - transition_name: rock_to_paper
+      start_pose: rock
+      target_pose: paper
+      frame_count: 32
+      pose_progress_schedule:
+        - 0.0000000000
+        - 0.0422833122
+        - 0.0890903569
+        - 0.2034005809
+        - 0.3621632324
+        - 0.4878967148
+        - 0.5967239262
+        - 0.6936475205
+        - 0.7869575124
+        - 0.8565443122
+        - 0.9015220089
+        - 0.9405489629
+        - 0.9658509022
+        - 0.9816038517
+        - 0.9892870527
+        - 0.9944526229
+        - 0.9973141821
+        - 0.9979265912
+        - 0.9987470324
+        - 0.9993516892
+        - 0.9994427916
+        - 0.9995709994
+        - 0.9996754314
+        - 0.9997613388
+        - 0.9998356390
+        - 0.9998356390
+        - 0.9998356390
+        - 0.9998356390
+        - 0.9998356390
+        - 0.9998356390
+        - 0.9998646943
+        - 1.0000000000
+    - transition_name: rock_to_scissors
+      start_pose: rock
+      target_pose: scissors
+      frame_count: 32
+      pose_progress_schedule:
+        - 0.0000000000
+        - 0.0797252976
+        - 0.1555181250
+        - 0.2388828544
+        - 0.3210316368
+        - 0.3785476384
+        - 0.4626076599
+        - 0.5606209854
+        - 0.6284846038
+        - 0.7085711829
+        - 0.7926543436
+        - 0.8622836279
+        - 0.9144418079
+        - 0.9490607177
+        - 0.9671365339
+        - 0.9793744417
+        - 0.9904548251
+        - 0.9991895515
+        - 0.9994739023
+        - 0.9996104872
+        - 0.9997231032
+        - 0.9997984462
+        - 0.9998219769
+        - 0.9998841570
+        - 0.9999300483
+        - 0.9999300483
+        - 0.9999300483
+        - 0.9999300483
+        - 0.9999300483
+        - 0.9999300483
+        - 0.9999300483
+        - 1.0000000000

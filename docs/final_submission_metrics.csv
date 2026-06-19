@@ -1,0 +1,7 @@
+section,metric,value,notes
+v4 fallback,profile weights,"[0.25, 0.75, 0.0]","fewshot_aug_tcn, rebalanced_tcn, final_gate_micro"
+v4 fallback,original20 strict validation,20/20,from v4 two-stage selector policy source
+v4 fallback,heldout15 validation,11/15,validation-only; not used for training/demo generation
+v7e diagnostics,original20 strict validation,17/20,diagnostic only; not promoted
+final live take,selected take,human rock -> robot paper,prompt-scissors retake
+final live take,episode result,actuator_feasible_win,remaining actuator time 0.4667 s

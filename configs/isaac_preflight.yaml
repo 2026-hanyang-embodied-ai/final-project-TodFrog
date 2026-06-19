@@ -1,0 +1,19 @@
+server:
+  ssh: voice@166.104.167.133
+  workspace: /home/voice/workspace/chominkyu/embodied-final
+
+docker:
+  image: nvcr.io/nvidia/isaac-sim:6.0.0-dev2
+  cache_root: /home/voice/workspace/chominkyu/embodied-final/.isaac-cache
+  requires_user_assisted_sudo: true
+  accept_eula: true
+  privacy_consent: false
+
+commands:
+  gpu_smoke_test: DOCKER_CMD="sudo docker" bash scripts/preflight_gpu_container.sh
+  isaac_compatibility_check: DOCKER_CMD="sudo docker" bash scripts/preflight_isaac_container.sh
+
+stop_before:
+  - runheadless.sh
+  - Isaac scene creation
+  - episode simulation

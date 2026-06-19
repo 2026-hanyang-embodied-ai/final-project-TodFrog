@@ -1,0 +1,198 @@
+{
+  "profile_name": "real_skeleton_three_class_wait_v4_final_gate_micro",
+  "model_state_path": "results/model_profiles/real_skeleton_three_class_wait_v4_final_gate_micro.pt",
+  "run_id": "gru_seed11_h64_l1_heads2_k3_drop0.1",
+  "selected_ratio": "0.50",
+  "selected_accuracy": 0.9885270170244264,
+  "selected_macro_f1": 0.9885204069231412,
+  "model": "gru",
+  "config": {
+    "model": "gru",
+    "seed": 11,
+    "hidden_size": 64,
+    "dropout": 0.1,
+    "layers": 1,
+    "heads": 2,
+    "kernel_size": 3
+  },
+  "label_names": [
+    "rock",
+    "paper",
+    "scissors"
+  ],
+  "sequence_length": 72,
+  "feature_dim": 126,
+  "feature_name": "landmark_velocity_126",
+  "dataset_root": "artifacts/real_guided_three_class_wait_expanded_v4_final_gate_micro_g1000_20260616",
+  "dataset_fingerprint": {
+    "path": "artifacts/real_guided_three_class_wait_expanded_v4_final_gate_micro_g1000_20260616",
+    "exists": true,
+    "shard_count": 37,
+    "size_bytes": 410647402,
+    "mtime_ns": 1781536763726421353,
+    "sha256": "2a481f4e139822fe64612e73a8889065cda3598bbf3fd78fdb19413071d6e2d3"
+  },
+  "metrics": {
+    "0.10": {
+      "accuracy": 0.6624722427831237,
+      "macro_f1": 0.641013289302563,
+      "confusion_matrix": [
+        [
+          666,
+          231,
+          3
+        ],
+        [
+          668,
+          228,
+          4
+        ],
+        [
+          3,
+          3,
+          896
+        ]
+      ],
+      "mean_confidence": 0.7273441622603125,
+      "median_confidence": 0.5908052921295166
+    },
+    "0.20": {
+      "accuracy": 0.6676535899333826,
+      "macro_f1": 0.6639409030635761,
+      "confusion_matrix": [
+        [
+          541,
+          354,
+          5
+        ],
+        [
+          533,
+          365,
+          2
+        ],
+        [
+          2,
+          2,
+          898
+        ]
+      ],
+      "mean_confidence": 0.7445864487938489,
+      "median_confidence": 0.6372931599617004
+    },
+    "0.30": {
+      "accuracy": 0.9585492227979274,
+      "macro_f1": 0.9585163762995874,
+      "confusion_matrix": [
+        [
+          849,
+          46,
+          5
+        ],
+        [
+          55,
+          844,
+          1
+        ],
+        [
+          3,
+          2,
+          897
+        ]
+      ],
+      "mean_confidence": 0.970468148556045,
+      "median_confidence": 0.99824458360672
+    },
+    "0.40": {
+      "accuracy": 0.9818652849740933,
+      "macro_f1": 0.9818626270183731,
+      "confusion_matrix": [
+        [
+          868,
+          30,
+          2
+        ],
+        [
+          12,
+          888,
+          0
+        ],
+        [
+          2,
+          3,
+          897
+        ]
+      ],
+      "mean_confidence": 0.9894682769639505,
+      "median_confidence": 0.9989970326423645
+    },
+    "0.50": {
+      "accuracy": 0.9885270170244264,
+      "macro_f1": 0.9885204069231412,
+      "confusion_matrix": [
+        [
+          876,
+          21,
+          3
+        ],
+        [
+          1,
+          898,
+          1
+        ],
+        [
+          2,
+          3,
+          897
+        ]
+      ],
+      "mean_confidence": 0.994290744989206,
+      "median_confidence": 0.9994356632232666
+    },
+    "0.75": {
+      "accuracy": 0.9925980754996299,
+      "macro_f1": 0.9925956275354887,
+      "confusion_matrix": [
+        [
+          884,
+          13,
+          3
+        ],
+        [
+          0,
+          899,
+          1
+        ],
+        [
+          0,
+          3,
+          899
+        ]
+      ],
+      "mean_confidence": 0.996293248290225,
+      "median_confidence": 0.9998753070831299
+    },
+    "1.00": {
+      "accuracy": 0.9944485566247224,
+      "macro_f1": 0.9944488536104509,
+      "confusion_matrix": [
+        [
+          890,
+          7,
+          3
+        ],
+        [
+          0,
+          898,
+          2
+        ],
+        [
+          0,
+          3,
+          899
+        ]
+      ],
+      "mean_confidence": 0.9966755579304996,
+      "median_confidence": 0.9998779296875
+    }
+  }
+}

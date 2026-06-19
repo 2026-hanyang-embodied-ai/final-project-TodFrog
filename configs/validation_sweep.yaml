@@ -1,0 +1,20 @@
+dataset_path: data/synthetic/rps_skeleton_dataset.npz
+output_dir: results/validation_sweeps
+device: auto
+batch_size: 64
+learning_rate: 0.003
+epochs: 4
+observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+seeds: [11, 23]
+run_minirocket: true
+run_stgcn: true
+minirocket:
+  num_kernels: [64, 128]
+  alphas: [0.1, 1.0]
+  kernel_sizes: [3, 5, 7]
+  dilations: [1, 2, 4]
+stgcn:
+  channels: [16, 32]
+  layers: [1, 2]
+  kernel_sizes: [3]
+  dropout: [0.0, 0.1]

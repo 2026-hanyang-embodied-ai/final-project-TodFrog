@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "embodied-rps"
+version = "0.3.0"
+description = "Actuator-constrained early intention prediction for simulated rock-paper-scissors robot hands."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26",
+  "PyYAML>=6.0",
+  "torch>=2.0",
+  "opencv-python>=4.8",
+  "pillow>=10.0",
+  "mediapipe>=0.10",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.8",
+  "nbformat>=5.10",
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "types-PyYAML>=6.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+embodied_rps = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

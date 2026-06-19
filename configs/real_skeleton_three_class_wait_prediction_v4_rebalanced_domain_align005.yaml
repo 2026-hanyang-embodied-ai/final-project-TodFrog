@@ -1,0 +1,20 @@
+dataset_root: artifacts/real_guided_three_class_wait_expanded_v4_rebalanced_20260615
+runs_dir: results/real_skeleton_three_class_wait_prediction_v4_rebalanced_domain_align005/model_runs
+comparison_path: results/real_skeleton_three_class_wait_prediction_v4_rebalanced_domain_align005/model_comparison.json
+profile_dir: results/model_profiles
+best_profile: real_skeleton_three_class_wait_v4_rebalanced_domain_align005
+device: auto
+batch_size: 128
+learning_rate: 0.003
+epochs: 40
+smoke_epochs: 1
+domain_alignment_seed_package_root: artifacts/real_skeleton_v4_calibration_seed_package_fewshot_20260615
+domain_alignment_loss_weight: 0.005
+observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+training_observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+seeds: [11]
+models:
+  tcn:
+    channels: [64]
+    kernel_sizes: [3]
+    dropout: [0.10]

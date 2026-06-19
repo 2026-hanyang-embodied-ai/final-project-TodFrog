@@ -1,0 +1,12 @@
+seed: 20260604
+episodes_per_class: 180
+sequence_length: 32
+duration_s_range: [0.45, 0.90]
+train_fraction: 0.70
+val_fraction: 0.15
+test_fraction: 0.15
+noise_std_range: [0.0, 0.025]
+finger_delay_s_range: [0.0, 0.16]
+hesitation_probability: 0.25
+output_path: data/synthetic/rps_skeleton_dataset.npz
+metadata_path: data/synthetic/rps_skeleton_dataset.json

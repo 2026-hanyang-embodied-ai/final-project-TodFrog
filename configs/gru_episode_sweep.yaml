@@ -1,0 +1,4 @@
+policy_config: configs/episode_policy.yaml
+thresholds: [0.50, 0.60, 0.70, 0.80, 0.90]
+log_dir: logs/gru_episode_sweep
+output_path: results/gru_episode_sweep.json

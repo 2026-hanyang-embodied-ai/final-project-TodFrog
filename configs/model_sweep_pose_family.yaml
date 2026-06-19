@@ -1,0 +1,30 @@
+dataset_path: data/synthetic/rps_pose_family_dataset.npz
+runs_dir: results/model_runs_pose_family
+comparison_path: results/model_comparison_pose_family.json
+device: auto
+batch_size: 64
+learning_rate: 0.003
+epochs: 40
+smoke_epochs: 1
+observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+training_observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+seeds: [11, 17]
+models:
+  gru:
+    hidden_sizes: [32, 64]
+    layers: [1, 2]
+    dropout: [0.0]
+  tcn:
+    channels: [32, 64]
+    kernel_sizes: [3, 5]
+    dropout: [0.0]
+  transformer:
+    dims: [32, 64]
+    heads: [2]
+    layers: [1, 2]
+    dropout: [0.0]
+  stgcn:
+    channels: [32, 64]
+    layers: [1]
+    kernel_sizes: [3]
+    dropout: [0.0]

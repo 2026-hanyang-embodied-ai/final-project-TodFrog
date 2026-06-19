@@ -1,0 +1,46 @@
+joint_names:
+  - thumb_curl
+  - index_curl
+  - middle_curl
+  - ring_curl
+  - little_curl
+
+gestures:
+  neutral:
+    thumb_curl: 0.20
+    index_curl: 0.20
+    middle_curl: 0.20
+    ring_curl: 0.20
+    little_curl: 0.20
+  rock:
+    thumb_curl: 0.95
+    index_curl: 1.00
+    middle_curl: 1.00
+    ring_curl: 1.00
+    little_curl: 1.00
+  paper:
+    thumb_curl: 0.05
+    index_curl: 0.00
+    middle_curl: 0.00
+    ring_curl: 0.00
+    little_curl: 0.00
+  scissors:
+    thumb_curl: 0.35
+    index_curl: 0.00
+    middle_curl: 0.00
+    ring_curl: 1.00
+    little_curl: 1.00
+
+actuator:
+  velocity_limits_rad_s:
+    thumb_curl: 3.0
+    index_curl: 3.0
+    middle_curl: 3.0
+    ring_curl: 3.0
+    little_curl: 3.0
+  response_delay_s: 0.08
+  deadline_s: 0.50
+
+output:
+  logs_dir: logs
+  results_dir: results

@@ -1,0 +1,27 @@
+dataset_root: artifacts/real_guided_large_sharded_20260610
+runs_dir: results/real_skeleton_final_gesture_prediction/model_runs
+comparison_path: results/real_skeleton_final_gesture_prediction/model_comparison.json
+profile_dir: results/model_profiles
+best_profile: real_skeleton_final_gesture
+device: auto
+batch_size: 128
+learning_rate: 0.003
+epochs: 40
+smoke_epochs: 1
+observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+training_observation_ratios: [0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1.00]
+seeds: [11, 17, 23]
+models:
+  gru:
+    hidden_sizes: [64, 128]
+    layers: [1, 2]
+    dropout: [0.10]
+  tcn:
+    channels: [64, 128]
+    kernel_sizes: [3, 5]
+    dropout: [0.10]
+  transformer:
+    dims: [64]
+    heads: [2]
+    layers: [1, 2]
+    dropout: [0.10]

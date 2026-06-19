@@ -1,0 +1,53 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+*.egg-info/
+build/
+dist/
+
+# Local Codex/runtime scratch
+.codex/
+.codex-tmp/
+.agents/
+
+# Large generated artifacts stay out of GitHub by default.
+artifacts/**
+results/**
+
+# Keep the small v4 model profiles required by the frozen live/demo config.
+!results/
+!results/model_profiles/
+!results/model_profiles/real_skeleton_three_class_wait_v4_fewshot_aug_tcn.json
+!results/model_profiles/real_skeleton_three_class_wait_v4_fewshot_aug_tcn.pt
+!results/model_profiles/real_skeleton_three_class_wait_v4_rebalanced_tcn.json
+!results/model_profiles/real_skeleton_three_class_wait_v4_rebalanced_tcn.pt
+!results/model_profiles/real_skeleton_three_class_wait_v4_final_gate_micro.json
+!results/model_profiles/real_skeleton_three_class_wait_v4_final_gate_micro.pt
+
+# Keep source documentation and report assets.
+!artifacts/.keep
+conference-latex-template/IEEE-conference-template-062824/*.aux
+conference-latex-template/IEEE-conference-template-062824/*.bbl
+conference-latex-template/IEEE-conference-template-062824/*.blg
+conference-latex-template/IEEE-conference-template-062824/*.fdb_latexmk
+conference-latex-template/IEEE-conference-template-062824/*.fls
+conference-latex-template/IEEE-conference-template-062824/*.log
+conference-latex-template/IEEE-conference-template-062824/*.out
+
+# Large local videos are linked/uploaded externally.
+*.mp4
+*.mov
+*.avi
+
+# Keep source PDFs that are part of the submission/report tree.
+!conference-latex-template/IEEE-conference-template-062824/final_report.pdf
+!proposal.pdf
+!presentation-slides.pdf

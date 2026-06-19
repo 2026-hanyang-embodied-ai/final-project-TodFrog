@@ -1,0 +1,21 @@
+﻿asset_config: configs/schunk_svh_asset.yaml
+pose_config: configs/schunk_rps_poses.yaml
+gestures:
+  - rock
+  - paper
+  - scissors
+  - neutral
+
+camera:
+  yaw_degrees: [0, 45, 90, 135, 180, 225, 270, 315]
+  pitch_degrees: [-20, 0, 20]
+  distance_m: 0.75
+  focal_length_mm: 35.0
+
+image:
+  width: 720
+  height: 520
+
+output:
+  preview_dir: results/schunk_svh_rps_preview
+  metadata_jsonl: results/schunk_svh_multiview_sample/schunk_svh_multiview.jsonl
