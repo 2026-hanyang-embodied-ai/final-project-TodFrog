@@ -133,6 +133,7 @@ Heldout `*/test` MP4s are validation-only. They are not training inputs and are 
 
 - Final report source: `conference-latex-template/IEEE-conference-template-062824/final_report.tex`
 - Final report PDF: `conference-latex-template/IEEE-conference-template-062824/final_report.pdf`
+- Final presentation deck: `final-presentation.pptx`
 - Presentation slides: `presentation-slides.pdf`
 - Proposal: `proposal.pdf`
 - Demo video upload: TODO: paste YouTube URL after upload.

@@ -14,7 +14,7 @@
 
 \title{Real-Guided Skeleton Augmentation for Actuator-Constrained Rock-Paper-Scissors Robot Counterattack}
 
-\author{\IEEEauthorblockN{Mingyu Cho and SeungHwan Kim}
+\author{\IEEEauthorblockN{MinKyu Cho and SeungHwan Kim}
 \IEEEauthorblockA{\textit{Embodied Artificial Intelligence Final Project}\\
 \textit{Hanyang University}\\
 Seoul, Republic of Korea}}
@@ -283,6 +283,10 @@ The second extension is image-conditioned Isaac or SCHUNK training. The current 
 The third extension is a more robust prompt-window model branch. The diagnostic v7e branch is retained only as report evidence after failing original20 validation at $17/20$, and v7f retraining was not started in this submission. A future v7f-style branch should begin only with explicit approval and should target the observed live failures: paper response-window confirmation and scissors-boundary timing under the actuator deadline.
 
 Finally, the screen-rendered robot response should be transferred to a physical or higher-fidelity simulated hand once the perception and timing metrics are stable. Physical deployment would require actuator calibration, command latency measurement, and safety limits beyond the normalized kinematic feasibility check used here.
+
+\section{Data Availability}
+
+The upload-ready dataset roots are documented in the repository dataset inventory and will be distributed through a Google Drive link in the repository README after upload. Large generated datasets and videos are intentionally kept outside GitHub; heldout \texttt{*/test} MP4s remain validation-only and are not training or demo-generation inputs.
 
 \section{Conclusion}
 
