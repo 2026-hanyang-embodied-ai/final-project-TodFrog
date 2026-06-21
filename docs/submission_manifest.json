@@ -18,6 +18,33 @@
     "alignment_frames_per_transition": 32,
     "aligned_manifest_entries": 64
   },
+  "runtime_environment": {
+    "scope": "local desktop validation environment for the final live recording and timing evidence",
+    "os": "Microsoft Windows 11 Pro 10.0.26200",
+    "cpu": "Intel(R) Core(TM) i5-14400F",
+    "cpu_cores": 10,
+    "logical_processors": 16,
+    "ram_bytes": 34164101120,
+    "ram_gib": 31.8,
+    "gpu": "NVIDIA GeForce RTX 4060",
+    "gpu_memory_mib": 8188,
+    "gpu_driver": "560.94",
+    "runtime_note": "Realtime config uses device=auto; PyTorch selects CUDA when available, while MediaPipe/OpenCV camera and video processing remain part of the measured local end-to-end loop."
+  },
+  "final_take_timing": {
+    "take_id": "take_01_human_rock_robot_paper",
+    "decision_frame": 62,
+    "decision_time_s": 2.033333333333333,
+    "response_window_start_time_s": 2.0,
+    "decision_latency_s": 0.033333333333333215,
+    "remaining_time_s": 0.4666666666666668,
+    "deadline_s": 0.5,
+    "response_delay_s": 0.08,
+    "required_time_s": 0.41333333333333333,
+    "limiting_joint": "index_curl",
+    "feasible": true,
+    "scope": "local end-to-end prompt-window validation timing, not a hardware-independent model latency benchmark"
+  },
   "final_live_candidate": {
     "video": "artifacts/final_submission_live_counterattack_recording_prompt_scissors_retake_20260619/selected_final_submission_take/final_submission_live_counterattack.mp4",
     "poster": "artifacts/final_submission_live_counterattack_recording_prompt_scissors_retake_20260619/selected_final_submission_take/poster_frame.png",
@@ -45,6 +72,7 @@
       "schunk_paper_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_paper_yaw45_pitch20.png",
       "schunk_scissors_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_scissors_yaw45_pitch20.png",
       "tcn_temporal_model": "conference-latex-template/IEEE-conference-template-062824/figures/tcn_temporal_model.png",
+      "final_take_timing_budget": "conference-latex-template/IEEE-conference-template-062824/figures/final_take_timing_budget.png",
       "verified_system_pipeline": "conference-latex-template/IEEE-conference-template-062824/figures/verified_system_pipeline.png"
     }
   },

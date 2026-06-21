@@ -22,6 +22,8 @@ The simulated robot-hand counterattack is the final application and validation t
 - Demo video upload: TODO: paste YouTube URL after upload.
 - Presentation video upload: TODO: paste YouTube URL after upload.
 
+The final demo timing is local desktop validation timing, including camera capture, MediaPipe, PyTorch/CUDA when available, OpenCV output, and actuator-feasibility checks. It is not a hardware-independent model latency benchmark.
+
 The final candidate follows the required prompt timing:
 
 ```text

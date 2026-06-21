@@ -27,6 +27,11 @@ FINAL_LIVE_SUMMARY = Path(
     "artifacts/final_submission_live_counterattack_recording_prompt_scissors_retake_20260619/"
     "selected_final_submission_take/selected_take_summary.json"
 )
+FINAL_LIVE_FEASIBILITY_SUMMARY = Path(
+    "artifacts/final_submission_live_counterattack_recording_prompt_scissors_retake_20260619/"
+    "selected_final_submission_take/feasibility_summary.json"
+)
+TAKE_SUMMARY_ROOT = Path("artifacts/final_submission_live_counterattack_recording_prompt_scissors_retake_20260619")
 THREE_TAKE_REVIEW_VIDEO = Path(
     "artifacts/final_submission_live_counterattack_recording_prompt_scissors_retake_20260619/"
     "combined_three_take_review/final_submission_three_take_counterattack_compilation.mp4"
@@ -56,6 +61,22 @@ FORBIDDEN_FINAL_VIDEO_TOKENS = (
     "artifacts/final_submission_prompt_counterattack_demo_20260619/replay_rehearsal",
 )
 PROTECTED_PDFS = (Path("proposal.pdf"), Path("presentation-slides.pdf"))
+RUNTIME_ENVIRONMENT = {
+    "scope": "local desktop validation environment for the final live recording and timing evidence",
+    "os": "Microsoft Windows 11 Pro 10.0.26200",
+    "cpu": "Intel(R) Core(TM) i5-14400F",
+    "cpu_cores": 10,
+    "logical_processors": 16,
+    "ram_bytes": 34164101120,
+    "ram_gib": 31.8,
+    "gpu": "NVIDIA GeForce RTX 4060",
+    "gpu_memory_mib": 8188,
+    "gpu_driver": "560.94",
+    "runtime_note": (
+        "Realtime config uses device=auto; PyTorch selects CUDA when available, "
+        "while MediaPipe/OpenCV camera and video processing remain part of the measured local end-to-end loop."
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -235,6 +256,11 @@ def copy_verified_report_figures(
         shutil.copyfile(tcn_image, tcn_target)
         outputs["tcn_temporal_model"] = _relative_path(tcn_target, project_root=project_root)
 
+    timing_summary = _read_json(project_root / FINAL_LIVE_FEASIBILITY_SUMMARY)
+    timing_figure = figure_root / "final_take_timing_budget.png"
+    _write_final_take_timing_budget(timing_figure, timing_summary)
+    outputs["final_take_timing_budget"] = _relative_path(timing_figure, project_root=project_root)
+
     system_diagram = figure_root / "verified_system_pipeline.png"
     _write_system_pipeline_diagram(system_diagram)
     outputs["verified_system_pipeline"] = _relative_path(system_diagram, project_root=project_root)
@@ -333,6 +359,7 @@ def write_submission_manifest(
 
     manifest_path = docs_root / "submission_manifest.json"
     selected_summary = _read_json(project_root / FINAL_LIVE_SUMMARY)
+    final_take_timing = _read_json(project_root / FINAL_LIVE_FEASIBILITY_SUMMARY)
     payload = {
         "status": "passed",
         "repository": "https://github.com/2026-hanyang-embodied-ai/final-project-TodFrog",
@@ -351,6 +378,21 @@ def write_submission_manifest(
             "large_split": [7000, 1500, 1500],
             "alignment_frames_per_transition": 32,
             "aligned_manifest_entries": 64,
+        },
+        "runtime_environment": RUNTIME_ENVIRONMENT,
+        "final_take_timing": {
+            "take_id": final_take_timing.get("take_id"),
+            "decision_frame": final_take_timing.get("decision_frame"),
+            "decision_time_s": final_take_timing.get("decision_time_s"),
+            "response_window_start_time_s": final_take_timing.get("response_window_start_time_s"),
+            "decision_latency_s": final_take_timing.get("decision_latency_s"),
+            "remaining_time_s": final_take_timing.get("remaining_time_s"),
+            "deadline_s": final_take_timing.get("actuator", {}).get("deadline_s"),
+            "response_delay_s": final_take_timing.get("actuator", {}).get("response_delay_s"),
+            "required_time_s": final_take_timing.get("required_time_s"),
+            "limiting_joint": final_take_timing.get("limiting_joint"),
+            "feasible": final_take_timing.get("feasible"),
+            "scope": "local end-to-end prompt-window validation timing, not a hardware-independent model latency benchmark",
         },
         "final_live_candidate": {
             "video": FINAL_LIVE_VIDEO.as_posix(),
@@ -543,6 +585,85 @@ def _write_system_pipeline_diagram(path: Path) -> None:
     image.save(path)
 
 
+def _write_final_take_timing_budget(path: Path, timing: dict[str, object]) -> None:
+    width, height = 1400, 480
+    margin_l, margin_r = 110, 90
+    track_y = 245
+    track_w = width - margin_l - margin_r
+    image = Image.new("RGB", (width, height), (248, 250, 252))
+    draw = ImageDraw.Draw(image)
+    title_font = _load_diagram_font(30)
+    label_font = _load_diagram_font(22)
+    small_font = _load_diagram_font(18)
+
+    deadline = float(timing.get("actuator", {}).get("deadline_s", 0.5))
+    latency = float(timing.get("decision_latency_s", 0.0))
+    remaining = float(timing.get("remaining_time_s", 0.0))
+    required = float(timing.get("required_time_s", 0.0))
+    response_delay = float(timing.get("actuator", {}).get("response_delay_s", 0.0))
+    motion_only = max(0.0, required - response_delay)
+    slack = max(0.0, remaining - required)
+
+    def x_at(seconds: float) -> int:
+        ratio = min(max(seconds / max(deadline, 1e-6), 0.0), 1.0)
+        return int(margin_l + ratio * track_w)
+
+    draw.text((40, 28), "Final live take timing budget", fill=(15, 23, 42), font=title_font)
+    draw.text(
+        (40, 70),
+        "Measured on the local desktop validation loop; not a hardware-independent latency benchmark.",
+        fill=(71, 85, 105),
+        font=small_font,
+    )
+    draw.line((margin_l, track_y, width - margin_r, track_y), fill=(30, 41, 59), width=5)
+    draw.text((margin_l - 5, track_y + 28), "t0 response start", fill=(15, 23, 42), font=small_font)
+    draw.text((width - margin_r - 145, track_y + 28), f"deadline {deadline:.2f}s", fill=(15, 23, 42), font=small_font)
+
+    decision_x = x_at(latency)
+    required_start_x = decision_x
+    required_end_x = x_at(latency + required)
+    deadline_x = x_at(deadline)
+    delay_end_x = x_at(latency + response_delay)
+
+    draw.line((decision_x, track_y - 125, decision_x, track_y + 70), fill=(37, 99, 235), width=4)
+    draw.ellipse((decision_x - 8, track_y - 8, decision_x + 8, track_y + 8), fill=(37, 99, 235))
+    draw.text((decision_x + 14, track_y - 124), f"decision\n{latency:.3f}s", fill=(30, 64, 175), font=small_font)
+
+    bar_y = track_y - 72
+    draw.rounded_rectangle((required_start_x, bar_y, required_end_x, bar_y + 28), radius=8, fill=(251, 146, 60))
+    if delay_end_x > required_start_x:
+        draw.rounded_rectangle((required_start_x, bar_y, delay_end_x, bar_y + 28), radius=8, fill=(251, 191, 36))
+    draw.text(
+        (required_start_x + 230, bar_y - 38),
+        f"required {required:.3f}s = delay {response_delay:.2f}s + motion {motion_only:.3f}s",
+        fill=(124, 45, 18),
+        font=small_font,
+    )
+
+    slack_start_x = required_end_x
+    if deadline_x > slack_start_x:
+        draw.rounded_rectangle((slack_start_x, bar_y + 42, deadline_x, bar_y + 70), radius=8, fill=(34, 197, 94))
+        draw.text((max(slack_start_x - 70, margin_l), bar_y + 78), f"slack {slack:.3f}s", fill=(22, 101, 52), font=small_font)
+
+    draw.text(
+        (40, 360),
+        (
+            f"take={timing.get('take_id')} | frame={timing.get('decision_frame')} | "
+            f"remaining={remaining:.3f}s | feasible={timing.get('feasible')} | "
+            f"limiting_joint={timing.get('limiting_joint')}"
+        ),
+        fill=(15, 23, 42),
+        font=label_font,
+    )
+    draw.text(
+        (40, 404),
+        "Feasibility requires required_time_s <= remaining_time_s after the confirmed response-window decision.",
+        fill=(71, 85, 105),
+        font=small_font,
+    )
+    image.save(path)
+
+
 def _center_multiline(draw: ImageDraw.ImageDraw, text: str, box: tuple[int, int, int, int], *, font: ImageFont.ImageFont) -> None:
     lines = text.splitlines()
     bbox = draw.textbbox((0, 0), "Ag", font=font)
@@ -617,12 +738,14 @@ def write_metrics_csv(path: Path) -> None:
         ("real-guided augmentation", "compact samples", "2000", "1000 rock_to_paper and 1000 rock_to_scissors"),
         ("real-guided augmentation", "large sharded samples", "10000", "split 7000/1500/1500"),
         ("render-ready alignment", "max progress error", "0.016", "32-frame real-guided schedule; old 8-frame max about 0.106"),
+        ("runtime environment", "local validation hardware", "i5-14400F / RTX 4060", "Windows 11 Pro; 10 CPU cores / 16 logical processors; about 31.8 GiB RAM"),
         ("v4 fallback", "profile weights", "[0.25, 0.75, 0.0]", "fewshot_aug_tcn, rebalanced_tcn, final_gate_micro"),
         ("v4 fallback", "original20 strict validation", "20/20", "from v4 two-stage selector policy source"),
         ("v4 fallback", "heldout15 validation", "11/15", "validation-only; not used for training/demo generation"),
         ("v7e diagnostics", "original20 strict validation", "17/20", "diagnostic only; not promoted"),
         ("final live take", "selected take", "human rock -> robot paper", "prompt-scissors retake"),
-        ("final live take", "episode result", "actuator_feasible_win", "remaining actuator time 0.4667 s"),
+        ("final live take", "decision latency", "0.0333 s", "local end-to-end response-window validation timing"),
+        ("final live take", "episode result", "actuator_feasible_win", "remaining actuator time 0.4667 s; required time 0.4133 s"),
     ]
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:

@@ -52,6 +52,7 @@ def test_copy_verified_report_figures_copies_tcn_and_system_diagram(tmp_path: Pa
     assert Path(outputs["real_guided_alignment_error"]).exists()
     assert Path(outputs["schunk_paper_yaw45_pitch20"]).exists()
     assert Path(outputs["tcn_temporal_model"]).exists()
+    assert Path(outputs["final_take_timing_budget"]).exists()
     assert Path(outputs["verified_system_pipeline"]).exists()
 
 
@@ -71,6 +72,10 @@ def test_submission_manifest_keeps_v4_live_and_v7e_diagnostic(tmp_path: Path) ->
     assert "real-guided skeleton" in payload["research_focus"]
     assert payload["pipeline_evidence"]["real_clips"] == 20
     assert payload["pipeline_evidence"]["large_sharded_samples"] == 10000
+    assert payload["runtime_environment"]["cpu"] == "Intel(R) Core(TM) i5-14400F"
+    assert payload["runtime_environment"]["gpu"] == "NVIDIA GeForce RTX 4060"
+    assert payload["final_take_timing"]["decision_frame"] == 62
+    assert payload["final_take_timing"]["scope"].startswith("local end-to-end")
     assert payload["live_demo_policy"]["family"] == "v4"
     assert payload["live_demo_policy"]["v7e_policy"] == "diagnostics only; not promoted"
     assert "realtime_demo_rehearsal_20260616" not in payload["final_live_candidate"]["video"]

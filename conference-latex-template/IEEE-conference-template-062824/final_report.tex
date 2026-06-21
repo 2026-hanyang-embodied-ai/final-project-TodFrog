@@ -14,7 +14,7 @@
 
 \title{Real-Guided Skeleton Augmentation for Actuator-Constrained Rock-Paper-Scissors Robot Counterattack}
 
-\author{\IEEEauthorblockN{Mingyu Cho}
+\author{\IEEEauthorblockN{Mingyu Cho and SeungHwan Kim}
 \IEEEauthorblockA{\textit{Embodied Artificial Intelligence Final Project}\\
 \textit{Hanyang University}\\
 Seoul, Republic of Korea}}
@@ -118,6 +118,22 @@ The live prompt sequence is:
 \]
 The human performs the target gesture during the final \texttt{scissors} response window. The counter policy maps human rock to robot paper, human paper to robot scissors, and human scissors to robot rock. The robot starts from rock, waits for a confirmed response-window prediction, and then checks response delay, deadline, velocity, and normalized joint limits before accepting the episode as actuator feasible.
 
+\subsection{Actuator Timing Model}
+
+The counterattack is evaluated in the response window, not over the entire video. Let $t_0$ be the start time of the final response prompt, $t_d$ be the first confirmed decision time, and $D$ be the actuator deadline after the response window opens. The response-window decision latency is
+\[
+L_d = t_d - t_0,
+\]
+and the remaining actuator budget is
+\[
+R = D - L_d.
+\]
+The robot response is feasible only if the actuator result satisfies
+\[
+\tau_{\mathrm{req}} \le R
+\]
+and all normalized joint targets remain inside their configured limits. Here $\tau_{\mathrm{req}}$ already includes the configured response delay and the slowest required joint motion. In the final selected live take, $t_0=2.0$ s, $t_d=2.0333$ s, $L_d=0.0333$ s, $D=0.50$ s, and $R=0.4667$ s. The configured response delay is $0.08$ s, the total required robot response time is $0.4133$ s, the limiting joint is \texttt{index\_curl}, and the episode passes because $0.4133 \le 0.4667$.
+
 \section{Experiments}
 
 Table~\ref{tab:dataset} summarizes the real-to-sim dataset path. The key point is that the project does not jump directly from a few real videos to a final demo. It first constructs a verified skeleton representation, then expands it into larger real-guided synthetic datasets.
@@ -157,6 +173,28 @@ Real-guided 32-frame grid & about 0.016 & render-ready alignment layer \\
 \end{tabular}
 \end{table}
 
+\subsection{Evaluation Platform and Runtime Context}
+
+The live timing evidence should be interpreted as local end-to-end validation timing. It includes camera capture, MediaPipe hand tracking, canonical feature construction, PyTorch model inference, decision gating, OpenCV overlay writing, and the feasibility computation on the local desktop used for recording. It is not a hardware-independent model-latency benchmark. The realtime configuration uses \texttt{device=auto}; on this machine PyTorch can select CUDA because an NVIDIA GPU is available, while MediaPipe and OpenCV remain part of the measured loop.
+
+\begin{table}[t]
+\caption{Local Runtime Environment For Final Live Validation}
+\label{tab:runtime}
+\centering
+\scriptsize
+\begin{tabular}{p{0.34\linewidth}p{0.54\linewidth}}
+\hline
+Component & Value \\
+\hline
+Operating system & Windows 11 Pro 10.0.26200 \\
+CPU & Intel Core i5-14400F, 10 cores / 16 logical processors \\
+Memory & 34164101120 bytes, about 31.8 GiB \\
+GPU & NVIDIA GeForce RTX 4060, 8188 MiB, driver 560.94 \\
+Runtime policy & \texttt{device=auto}; CUDA is available for PyTorch model execution \\
+\hline
+\end{tabular}
+\end{table}
+
 \section{Final Live Validation}
 
 The final live validation tests whether the skeleton predictor transfers back to a real prompt-window camera capture. The selected final take is \texttt{human rock -> robot paper}. During the final \texttt{PROMPT SCISSORS} response window, the system predicts rock and issues robot paper. The actuator feasibility checker reports an actuator-feasible win with 0.4667 s remaining. Fig.~\ref{fig:finaltake} shows the poster frame.
@@ -166,6 +204,15 @@ The final live validation tests whether the skeleton predictor transfers back to
     \includegraphics[width=\linewidth]{final_live_candidate_poster.png}
     \caption{Final sim-to-real counterattack validation. The frozen skeleton predictor is applied back to live prompt-window input and drives an actuator-feasible robot paper response.}
     \label{fig:finaltake}
+\end{figure}
+
+Fig.~\ref{fig:timing} visualizes the selected take's timing budget. The decision occurs shortly after the response window opens, leaving enough time for the delayed robot command and the rock-to-paper motion.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{final_take_timing_budget.png}
+    \caption{Final selected take timing budget. The measured decision latency is local end-to-end validation timing on the desktop in Table~\ref{tab:runtime}, not a universal model latency number.}
+    \label{fig:timing}
 \end{figure}
 
 The robot-hand visuals use archived SCHUNK-style render keyframes as the response pose library, shown in Fig.~\ref{fig:schunk}. These images explain the screen-rendered robot response, but they are not the main evidence for the real-guided data expansion.
@@ -201,13 +248,41 @@ Final live take & remaining time & 0.4667 s \\
 \end{tabular}
 \end{table}
 
-\section{Discussion}
+\begin{table}[t]
+\caption{Final Prompt-Scissors Live Take Diagnostics}
+\label{tab:takes}
+\centering
+\scriptsize
+\begin{tabular}{p{0.30\linewidth}p{0.27\linewidth}p{0.31\linewidth}}
+\hline
+Take & Decision & Outcome \\
+\hline
+human rock -> robot paper & predicted rock at frame 62; latency 0.0333 s & selected; actuator-feasible win; remaining 0.4667 s \\
+human paper -> robot scissors & no confirmed paper response-window decision & diagnostic failure; no counter issued \\
+human scissors -> robot rock & predicted scissors at frame 81; latency 0.6667 s & diagnostic failure; infeasible due negative time budget \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Limitations}
 
 The most important result is not that a screen-rendered robot hand appears in the final video. The important research path is that a small real skeleton seed set can be converted into a larger real-guided skeleton dataset, aligned to the robot-hand embodiment, and then transferred back to live camera input for a timing-constrained response.
 
-The project also exposes a limitation. The final training and live/demo path is skeleton-first. The render-ready sidecars prepare the dataset for image- or render-conditioned Isaac experiments, but the final predictor does not learn from raw Isaac camera images. This is an intentional v1 boundary rather than a hidden failure. It keeps the final system verifiable and avoids confusing skeleton prediction with a separate vision-based landmark-estimation problem.
+The project also exposes several limitations. First, the final training and live/demo path is skeleton-first. The render-ready sidecars prepare the dataset for image- or render-conditioned Isaac experiments, but the final predictor does not learn from raw Isaac camera images. This is an intentional v1 boundary rather than a hidden failure. It keeps the final system verifiable and avoids confusing skeleton prediction with a separate vision-based landmark-estimation problem.
 
-The counterattack demo remains valuable as an embodied validation target. It forces the temporal predictor to be useful before the prompt window closes and rejects correct but late decisions through actuator feasibility. The failed diagnostic takes are therefore part of the evidence: a model can fail by making no stable decision, by selecting the wrong class, or by deciding too late for the robot to move.
+Second, the final timing values depend on the local validation platform. The measured latency includes camera acquisition, MediaPipe, feature extraction, PyTorch/CUDA inference when available, decision gating, and OpenCV video output. A different camera, CPU, GPU, driver stack, or display path could change the end-to-end timing even if the learned predictor weights are unchanged.
+
+Third, only one of the final prompt-scissors live takes passed the full actuator-feasible counterattack criterion. The paper take failed because no confirmed paper decision was produced inside the response window. The scissors take produced a confirmed scissors decision, but too late for the actuator deadline. These failures are useful because they show why the evaluation must include timing and feasibility, but they also limit the breadth of the live evidence.
+
+\section{Future Work}
+
+The first extension is hardware-normalized latency benchmarking. Future runs should separate MediaPipe time, feature construction time, model forward-pass time, decision-gate time, and rendering/output time, then report them across CPU-only and CUDA-enabled configurations. This would distinguish predictor speed from local camera and video I/O overhead.
+
+The second extension is image-conditioned Isaac or SCHUNK training. The current dataset already contains render-ready alignment fields, but the final model still consumes skeleton features. A future branch could train an image-to-skeleton or render-conditioned temporal model, using the existing skeleton labels as supervision while measuring the cost of moving beyond the skeleton-ground-truth-first assumption.
+
+The third extension is a more robust prompt-window model branch. The diagnostic v7e branch is retained only as report evidence after failing original20 validation at $17/20$, and v7f retraining was not started in this submission. A future v7f-style branch should begin only with explicit approval and should target the observed live failures: paper response-window confirmation and scissors-boundary timing under the actuator deadline.
+
+Finally, the screen-rendered robot response should be transferred to a physical or higher-fidelity simulated hand once the perception and timing metrics are stable. Physical deployment would require actuator calibration, command latency measurement, and safety limits beyond the normalized kinematic feasibility check used here.
 
 \section{Conclusion}
 

@@ -19,6 +19,7 @@
     "schunk_paper_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_paper_yaw45_pitch20.png",
     "schunk_scissors_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_scissors_yaw45_pitch20.png",
     "tcn_temporal_model": "conference-latex-template/IEEE-conference-template-062824/figures/tcn_temporal_model.png",
+    "final_take_timing_budget": "conference-latex-template/IEEE-conference-template-062824/figures/final_take_timing_budget.png",
     "verified_system_pipeline": "conference-latex-template/IEEE-conference-template-062824/figures/verified_system_pipeline.png"
   },
   "dataset_inventory": [
