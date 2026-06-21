@@ -54,6 +54,9 @@ def test_copy_verified_report_figures_copies_tcn_and_system_diagram(tmp_path: Pa
     assert Path(outputs["tcn_temporal_model"]).exists()
     assert Path(outputs["final_take_timing_budget"]).exists()
     assert Path(outputs["verified_system_pipeline"]).exists()
+    with Image.open(Path(outputs["verified_system_pipeline"])) as pipeline:
+        assert pipeline.width >= 2000
+        assert pipeline.height >= 1400
 
 
 def test_submission_manifest_keeps_v4_live_and_v7e_diagnostic(tmp_path: Path) -> None:

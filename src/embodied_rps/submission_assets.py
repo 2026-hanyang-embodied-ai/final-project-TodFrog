@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from PIL import Image, ImageDraw, ImageFont  # type: ignore[import-untyped]
+from PIL import Image, ImageChops, ImageDraw, ImageFont  # type: ignore[import-untyped]
 
 
 DatasetStatus = Literal["upload_ready", "metadata_only", "missing"]
@@ -262,7 +262,7 @@ def copy_verified_report_figures(
     outputs["final_take_timing_budget"] = _relative_path(timing_figure, project_root=project_root)
 
     system_diagram = figure_root / "verified_system_pipeline.png"
-    _write_system_pipeline_diagram(system_diagram)
+    _write_system_pipeline_diagram(system_diagram, project_root=project_root, timing_figure=timing_figure)
     outputs["verified_system_pipeline"] = _relative_path(system_diagram, project_root=project_root)
     return outputs
 
@@ -550,39 +550,256 @@ def _validate_final_video_paths(project_root: Path) -> None:
         raise ValueError("Final submission video must not point to replay rehearsal artifacts")
 
 
-def _write_system_pipeline_diagram(path: Path) -> None:
-    width, height = 1600, 420
+def _write_system_pipeline_diagram(path: Path, *, project_root: Path, timing_figure: Path) -> None:
+    width, height = 2400, 1530
     image = Image.new("RGB", (width, height), (248, 250, 252))
     draw = ImageDraw.Draw(image)
-    title_font = _load_diagram_font(30)
-    label_font = _load_diagram_font(24)
-    footer_font = _load_diagram_font(18)
-    title = "Real-to-sim-to-real skeleton pipeline"
-    draw.text((40, 28), title, fill=(15, 23, 42), font=title_font)
-    boxes = [
-        ("Few real\nRPS videos", (40, 120, 245, 285), (219, 234, 254)),
-        ("MediaPipe\n21 landmarks", (285, 120, 490, 285), (220, 252, 231)),
-        ("Canonical\nskeleton seeds", (530, 120, 735, 285), (254, 249, 195)),
-        ("Real-guided\naugmentation", (775, 120, 980, 285), (255, 237, 213)),
-        ("TCN predictor\nsim-to-real", (1020, 120, 1225, 285), (237, 233, 254)),
-        ("Actuator-feasible\nrobot response", (1265, 120, 1530, 285), (229, 231, 235)),
-    ]
-    for index, (label, box, color) in enumerate(boxes):
-        draw.rounded_rectangle(box, radius=12, fill=color, outline=(71, 85, 105), width=2)
-        _center_multiline(draw, label, box, font=label_font)
-        if index < len(boxes) - 1:
-            x2 = box[2]
-            next_x1 = boxes[index + 1][1][0]
-            y = (box[1] + box[3]) // 2
-            draw.line((x2 + 12, y, next_x1 - 12, y), fill=(30, 41, 59), width=3)
-            draw.polygon([(next_x1 - 12, y), (next_x1 - 28, y - 8), (next_x1 - 28, y + 8)], fill=(30, 41, 59))
+    title_font = _load_diagram_font(52)
+    subtitle_font = _load_diagram_font(30)
+    panel_title_font = _load_diagram_font(30)
+    note_font = _load_diagram_font(24)
+    footer_font = _load_diagram_font(20)
+    draw.text((70, 42), "Real-to-sim-to-real RPS skeleton pipeline", fill=(15, 23, 42), font=title_font)
     draw.text(
-        (40, 350),
-        "Schematic built from verified project artifacts; not a fabricated fresh Isaac Sim screenshot.",
+        (72, 105),
+        "Verified artifact thumbnails: live capture, MediaPipe skeletons, real-guided augmentation, archived SCHUNK renders, and timing validation.",
+        fill=(71, 85, 105),
+        font=subtitle_font,
+    )
+
+    stages = [
+        {
+            "title": "1. Real prompt capture",
+            "source": project_root / FINAL_LIVE_POSTER,
+            "note": "Live prompt-window frame: the final response cue, hand landmarks, v4 prediction, and robot counter state.",
+            "color": (219, 234, 254),
+            "crop_box": (245, 300, 925, 805),
+            "panel": (70, 205, 740, 720),
+            "image_height": 330,
+        },
+        {
+            "title": "2. Canonical skeleton",
+            "source": project_root / CANONICAL_SEED_PREVIEW,
+            "note": "Real MediaPipe 21-landmark trajectories are converted into canonical hand-local motion features.",
+            "color": (220, 252, 231),
+            "trim_content": True,
+            "panel": (865, 205, 1535, 720),
+            "image_height": 330,
+        },
+        {
+            "title": "3. Real-guided expansion",
+            "source": project_root / REAL_GUIDED_AUGMENTATION_PREVIEW,
+            "note": "A few real seeds are expanded into synthetic skeleton trajectories for temporal predictor training.",
+            "color": (254, 249, 195),
+            "trim_content": True,
+            "panel": (1660, 205, 2330, 720),
+            "image_height": 330,
+        },
+        {
+            "title": "4. Robot response pose library",
+            "source": None,
+            "note": "Archived SCHUNK/Isaac-style rock, paper, and scissors keyframes define the screen-rendered counterattack hand.",
+            "color": (255, 237, 213),
+            "panel": (190, 820, 1130, 1315),
+            "image_height": 310,
+        },
+        {
+            "title": "5. Timed sim-to-real validation",
+            "source": timing_figure,
+            "note": "The confirmed live decision is accepted only if enough local end-to-end time remains for the actuator-constrained response.",
+            "color": (237, 233, 254),
+            "trim_content": True,
+            "panel": (1270, 820, 2210, 1315),
+            "image_height": 310,
+        },
+    ]
+
+    for stage in stages:
+        panel = tuple(int(value) for value in stage["panel"])
+        x, top, x2, panel_bottom = panel
+        panel_w = x2 - x
+        draw.rounded_rectangle(panel, radius=18, fill=stage["color"], outline=(51, 65, 85), width=3)
+        draw.text((x + 24, top + 22), str(stage["title"]), fill=(15, 23, 42), font=panel_title_font)
+        image_h = int(stage["image_height"])
+        image_box = (x + 24, top + 82, x + panel_w - 24, top + 82 + image_h)
+        draw.rounded_rectangle(image_box, radius=12, fill=(255, 255, 255), outline=(148, 163, 184), width=2)
+        if stage["source"] is None:
+            _draw_schunk_pose_montage(
+                draw=draw,
+                canvas=image,
+                project_root=project_root,
+                box=image_box,
+                font=note_font,
+            )
+        else:
+            _paste_image_contain(
+                image,
+                Path(stage["source"]),
+                image_box,
+                fill=(255, 255, 255),
+                crop_box=stage.get("crop_box"),
+                trim_content=bool(stage.get("trim_content", False)),
+            )
+        _draw_wrapped_text(
+            draw,
+            str(stage["note"]),
+            (x + 26, image_box[3] + 28, x2 - 26, panel_bottom - 34),
+            font=note_font,
+            fill=(30, 41, 59),
+            line_spacing=8,
+        )
+
+    _draw_arrow(draw, (760, 462), (845, 462))
+    _draw_arrow(draw, (1555, 462), (1640, 462))
+    draw.line((1995, 735, 1995, 770, 660, 770, 660, 800), fill=(30, 41, 59), width=8)
+    draw.polygon([(660, 800), (642, 774), (678, 774)], fill=(30, 41, 59))
+    _draw_arrow(draw, (1150, 1068), (1250, 1068))
+
+    metrics = [
+        "20 real clips / 720 frames",
+        "142-D canonical features",
+        "10,000 generated samples",
+        "32-frame SCHUNK alignment",
+        "0.033s decision latency / 0.467s remaining",
+    ]
+    metric_y = 1370
+    metric_x = 72
+    for metric in metrics:
+        bbox = draw.textbbox((0, 0), metric, font=note_font)
+        w = bbox[2] - bbox[0] + 34
+        draw.rounded_rectangle((metric_x, metric_y, metric_x + w, metric_y + 44), radius=20, fill=(226, 232, 240), outline=(148, 163, 184), width=1)
+        draw.text((metric_x + 17, metric_y + 10), metric, fill=(15, 23, 42), font=note_font)
+        metric_x += w + 22
+
+    draw.text(
+        (72, 1458),
+        "Composite figure built from verified project artifacts; it is not a fabricated fresh Isaac Sim screenshot.",
         fill=(71, 85, 105),
         font=footer_font,
     )
     image.save(path)
+
+
+def _draw_arrow(draw: ImageDraw.ImageDraw, start: tuple[int, int], end: tuple[int, int]) -> None:
+    draw.line((*start, *end), fill=(30, 41, 59), width=8)
+    if end[0] >= start[0]:
+        draw.polygon([(end[0], end[1]), (end[0] - 24, end[1] - 16), (end[0] - 24, end[1] + 16)], fill=(30, 41, 59))
+    else:
+        draw.polygon([(end[0], end[1]), (end[0] + 24, end[1] - 16), (end[0] + 24, end[1] + 16)], fill=(30, 41, 59))
+
+
+def _draw_schunk_pose_montage(
+    *,
+    draw: ImageDraw.ImageDraw,
+    canvas: Image.Image,
+    project_root: Path,
+    box: tuple[int, int, int, int],
+    font: ImageFont.ImageFont,
+) -> None:
+    labels = ("rock", "paper", "scissors")
+    paths = [
+        project_root / SCHUNK_STYLE_ROOT / "rock_view_yaw45_pitch20.png",
+        project_root / SCHUNK_STYLE_ROOT / "paper_view_yaw45_pitch20.png",
+        project_root / SCHUNK_STYLE_ROOT / "scissors_view_yaw45_pitch20.png",
+    ]
+    x1, y1, x2, y2 = box
+    pad = 14
+    thumb_gap = 12
+    box_w = x2 - x1
+    box_h = y2 - y1
+    if box_w > box_h * 1.45:
+        thumb_w = (box_w - pad * 2 - thumb_gap * 2) // 3
+        thumb_h = box_h - pad * 2
+        for index, (label, source) in enumerate(zip(labels, paths, strict=True)):
+            tx1 = x1 + pad + index * (thumb_w + thumb_gap)
+            thumb_box = (tx1, y1 + pad, tx1 + thumb_w, y1 + pad + thumb_h)
+            _paste_image_contain(canvas, source, thumb_box, fill=(248, 250, 252))
+            draw.rounded_rectangle(thumb_box, radius=8, outline=(148, 163, 184), width=1)
+            draw.text((thumb_box[0] + 10, thumb_box[1] + 8), label, fill=(15, 23, 42), font=font)
+        return
+
+    thumb_h = (box_h - pad * 2 - thumb_gap * 2) // 3
+    thumb_w = box_w - pad * 2
+    for index, (label, source) in enumerate(zip(labels, paths, strict=True)):
+        ty1 = y1 + pad + index * (thumb_h + thumb_gap)
+        thumb_box = (x1 + pad, ty1, x1 + pad + thumb_w, ty1 + thumb_h)
+        _paste_image_contain(canvas, source, thumb_box, fill=(248, 250, 252))
+        draw.rounded_rectangle(thumb_box, radius=8, outline=(148, 163, 184), width=1)
+        draw.text((thumb_box[0] + 10, thumb_box[1] + 8), label, fill=(15, 23, 42), font=font)
+
+
+def _paste_image_contain(
+    canvas: Image.Image,
+    source: Path,
+    box: tuple[int, int, int, int],
+    *,
+    fill: tuple[int, int, int],
+    crop_box: object | None = None,
+    trim_content: bool = False,
+) -> None:
+    with Image.open(source) as opened:
+        source_image = opened.convert("RGB")
+    if isinstance(crop_box, tuple) and len(crop_box) == 4:
+        source_image = source_image.crop(tuple(int(value) for value in crop_box))
+    if trim_content:
+        source_image = _trim_near_white(source_image)
+    x1, y1, x2, y2 = box
+    target_w = x2 - x1
+    target_h = y2 - y1
+    scale = min(target_w / source_image.width, target_h / source_image.height)
+    resized = source_image.resize((max(1, int(source_image.width * scale)), max(1, int(source_image.height * scale))), Image.Resampling.LANCZOS)
+    background = Image.new("RGB", (target_w, target_h), fill)
+    paste_x = (target_w - resized.width) // 2
+    paste_y = (target_h - resized.height) // 2
+    background.paste(resized, (paste_x, paste_y))
+    canvas.paste(background, (x1, y1))
+
+
+def _trim_near_white(image: Image.Image) -> Image.Image:
+    background = Image.new("RGB", image.size, (255, 255, 255))
+    diff = ImageChops.difference(image, background).convert("L")
+    mask = diff.point(lambda value: 255 if value > 12 else 0)
+    bbox = mask.getbbox()
+    if bbox is None:
+        return image
+    left, top, right, bottom = bbox
+    pad = 16
+    left = max(0, left - pad)
+    top = max(0, top - pad)
+    right = min(image.width, right + pad)
+    bottom = min(image.height, bottom + pad)
+    return image.crop((left, top, right, bottom))
+
+
+def _draw_wrapped_text(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    box: tuple[int, int, int, int],
+    *,
+    font: ImageFont.ImageFont,
+    fill: tuple[int, int, int],
+    line_spacing: int,
+) -> None:
+    x1, y1, x2, _ = box
+    words = text.split()
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        candidate = word if not current else f"{current} {word}"
+        bbox = draw.textbbox((0, 0), candidate, font=font)
+        if bbox[2] - bbox[0] <= x2 - x1:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    y = y1
+    line_h = draw.textbbox((0, 0), "Ag", font=font)[3] + line_spacing
+    for line in lines:
+        draw.text((x1, y), line, fill=fill, font=font)
+        y += line_h
 
 
 def _write_final_take_timing_budget(path: Path, timing: dict[str, object]) -> None:

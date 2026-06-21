@@ -35,14 +35,14 @@ Embodied interaction requires more than recognizing a final pose after an action
 
 The main difficulty in this project is data scarcity. Recording many high-quality real hand-motion videos is expensive, and final-frame pose labels do not capture when the hand begins to reveal the final gesture. The project therefore uses a skeleton-first real-to-sim-to-real strategy. A small set of real videos is converted into MediaPipe 21-landmark trajectories, those trajectories are canonicalized into hand-local coordinates and temporal features, and real-guided augmentation generates broader skeleton motion coverage. The synthetic skeletons are aligned to SCHUNK/Isaac-style pose progress so they remain connected to the intended robot-hand embodiment.
 
-Fig.~\ref{fig:pipeline} summarizes the final pipeline. The pipeline is deliberately not a raw image-to-landmark Isaac perception system. Instead, it follows the project boundary of skeleton ground truth first: camera frames are used to obtain MediaPipe skeletons, and the temporal model consumes canonical skeleton features. The robot hand appears at the end as an actuator-constrained response target.
+Fig.~\ref{fig:pipeline} summarizes the final pipeline with verified artifact thumbnails. The pipeline is deliberately not a raw image-to-landmark Isaac perception system. Instead, it follows the project boundary of skeleton ground truth first: camera frames are used to obtain MediaPipe skeletons, and the temporal model consumes canonical skeleton features. The robot hand appears at the end as an actuator-constrained response target.
 
-\begin{figure}[t]
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=\linewidth]{verified_system_pipeline.png}
-    \caption{Real-to-sim-to-real pipeline schematic. The figure is a schematic built from verified project artifacts, not a fresh Isaac Sim screenshot.}
+    \includegraphics[width=\textwidth]{verified_system_pipeline.png}
+    \caption{Real-to-sim-to-real pipeline composite built from verified project artifacts: the final live prompt capture, canonical MediaPipe skeleton preview, real-guided augmentation preview, archived SCHUNK-style response poses, and final timing validation. The figure is not a fabricated fresh Isaac Sim screenshot.}
     \label{fig:pipeline}
-\end{figure}
+\end{figure*}
 
 This report makes four contributions:
 \begin{itemize}
