@@ -47,6 +47,9 @@ def test_copy_verified_report_figures_copies_tcn_and_system_diagram(tmp_path: Pa
     outputs = copy_verified_report_figures(project_root=Path.cwd(), figure_root=tmp_path / "figures", tcn_image=tcn)
 
     assert Path(outputs["final_live_candidate_poster"]).exists()
+    assert Path(outputs["canonical_skeleton_seed"]).exists()
+    assert Path(outputs["real_guided_skeleton_augmentation"]).exists()
+    assert Path(outputs["real_guided_alignment_error"]).exists()
     assert Path(outputs["schunk_paper_yaw45_pitch20"]).exists()
     assert Path(outputs["tcn_temporal_model"]).exists()
     assert Path(outputs["verified_system_pipeline"]).exists()
@@ -65,6 +68,9 @@ def test_submission_manifest_keeps_v4_live_and_v7e_diagnostic(tmp_path: Path) ->
 
     payload = json.loads((tmp_path / "submission_manifest.json").read_text(encoding="utf-8"))
     assert manifest["path"].endswith("submission_manifest.json")
+    assert "real-guided skeleton" in payload["research_focus"]
+    assert payload["pipeline_evidence"]["real_clips"] == 20
+    assert payload["pipeline_evidence"]["large_sharded_samples"] == 10000
     assert payload["live_demo_policy"]["family"] == "v4"
     assert payload["live_demo_policy"]["v7e_policy"] == "diagnostics only; not promoted"
     assert "realtime_demo_rehearsal_20260616" not in payload["final_live_candidate"]["video"]

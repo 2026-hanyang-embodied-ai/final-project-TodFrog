@@ -11,6 +11,10 @@
   "figures": {
     "final_live_candidate_poster": "conference-latex-template/IEEE-conference-template-062824/figures/final_live_candidate_poster.png",
     "three_take_review_poster": "conference-latex-template/IEEE-conference-template-062824/figures/three_take_review_poster.png",
+    "canonical_skeleton_seed": "conference-latex-template/IEEE-conference-template-062824/figures/canonical_skeleton_seed.png",
+    "real_guided_skeleton_augmentation": "conference-latex-template/IEEE-conference-template-062824/figures/real_guided_skeleton_augmentation.png",
+    "real_guided_alignment_error": "conference-latex-template/IEEE-conference-template-062824/figures/real_guided_alignment_error.png",
+    "real_guided_pose_schedule": "conference-latex-template/IEEE-conference-template-062824/figures/real_guided_pose_schedule.png",
     "schunk_rock_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_rock_yaw45_pitch20.png",
     "schunk_paper_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_paper_yaw45_pitch20.png",
     "schunk_scissors_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_scissors_yaw45_pitch20.png",

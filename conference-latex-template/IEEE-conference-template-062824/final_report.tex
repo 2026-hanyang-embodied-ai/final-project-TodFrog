@@ -12,7 +12,7 @@
 
 \begin{document}
 
-\title{Actuator-Constrained Early Intention Prediction for Simulated Rock-Paper-Scissors Robot Hands}
+\title{Real-Guided Skeleton Augmentation for Actuator-Constrained Rock-Paper-Scissors Robot Counterattack}
 
 \author{\IEEEauthorblockN{Mingyu Cho}
 \IEEEauthorblockA{\textit{Embodied Artificial Intelligence Final Project}\\
@@ -22,142 +22,196 @@ Seoul, Republic of Korea}}
 \maketitle
 
 \begin{abstract}
-This report presents a screen-rendered robot-hand counterattack demo for Rock-Paper-Scissors. The task is framed as actuator-constrained early intention prediction: the system observes a prompt-window human hand motion, predicts the intended final gesture before the window closes, selects the winning counter move, and accepts the episode only when the simulated hand can reach the counter pose within the actuator deadline. The final live demo uses a frozen v4 skeleton predictor with profile weights $[0.25, 0.75, 0.0]$, while v7e is retained only as a diagnostic branch after failing strict original20 validation at $17/20$. In the selected final live take, the human performs rock during the final prompt window, the system issues robot paper, and the actuator feasibility checker reports an actuator-feasible win with $0.4667$ s remaining.
+This report presents a skeleton-first real-to-sim-to-real pipeline for an embodied Rock-Paper-Scissors counterattack task. The project begins with a small set of real hand-motion videos, extracts MediaPipe 21-landmark skeletons, canonicalizes the trajectories, and expands them into real-guided synthetic skeleton datasets aligned to SCHUNK/Isaac-style robot-hand pose progress. From only 20 reviewed real clips and 720 processed frames, the pipeline builds a 10,000-sample sharded skeleton dataset and a render-ready 32-frame alignment layer. The final live validation applies the frozen v4 temporal predictor back to a prompt-window camera capture and produces an actuator-feasible robot counterattack with 0.4667 s remaining. The robot hand is therefore the final embodied response target, while the main research contribution is the real-guided skeleton augmentation and transfer path.
 \end{abstract}
 
 \begin{IEEEkeywords}
-early action prediction, skeleton sequence modeling, actuator feasibility, robot hand, Rock-Paper-Scissors, SCHUNK SVH
+real-to-sim, sim-to-real, skeleton sequence modeling, MediaPipe, early action prediction, actuator feasibility, robot hand
 \end{IEEEkeywords}
 
 \section{Introduction}
 
-Fast human-robot interaction is not only a perception problem. A robot can predict the correct future action and still fail if the decision arrives too late for the actuator to respond. This final project studies that timing gap through a compact Rock-Paper-Scissors task. The robot observes a human hand during a bounded prompt window and tries to issue a simulated counter gesture before the deadline.
+Embodied interaction requires more than recognizing a final pose after an action is complete. In a Rock-Paper-Scissors counterattack, a robot must infer the human's intended gesture early enough to choose a winning response and still move its hand before the actuator deadline. This makes the problem a combined data, prediction, and control problem: sparse real hand-motion data must support an early temporal predictor, and the predictor must transfer back to live camera input under timing constraints.
 
-The central question is: when does partial hand-motion evidence become useful early enough for an embodied response? This differs from final-frame gesture recognition. The system must decide from incomplete motion, abstain or wait when evidence is insufficient, and then verify that the selected counter gesture is reachable from the robot's start pose under velocity and deadline constraints.
+The main difficulty in this project is data scarcity. Recording many high-quality real hand-motion videos is expensive, and final-frame pose labels do not capture when the hand begins to reveal the final gesture. The project therefore uses a skeleton-first real-to-sim-to-real strategy. A small set of real videos is converted into MediaPipe 21-landmark trajectories, those trajectories are canonicalized into hand-local coordinates and temporal features, and real-guided augmentation generates broader skeleton motion coverage. The synthetic skeletons are aligned to SCHUNK/Isaac-style pose progress so they remain connected to the intended robot-hand embodiment.
 
-The final implementation uses a skeleton-first pipeline. MediaPipe-style 21-landmark hand observations are converted into canonical landmark and velocity features, a frozen v4 temporal predictor estimates the final gesture, a counter policy maps the prediction to the winning robot gesture, and a kinematic SCHUNK-style hand renderer visualizes the response. Fig.~\ref{fig:pipeline} summarizes the final system.
+Fig.~\ref{fig:pipeline} summarizes the final pipeline. The pipeline is deliberately not a raw image-to-landmark Isaac perception system. Instead, it follows the project boundary of skeleton ground truth first: camera frames are used to obtain MediaPipe skeletons, and the temporal model consumes canonical skeleton features. The robot hand appears at the end as an actuator-constrained response target.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{verified_system_pipeline.png}
-    \caption{Final submission pipeline. This is a schematic built from verified project artifacts, not a fabricated fresh Isaac Sim screenshot.}
+    \caption{Real-to-sim-to-real pipeline schematic. The figure is a schematic built from verified project artifacts, not a fresh Isaac Sim screenshot.}
     \label{fig:pipeline}
 \end{figure}
 
-The contributions are:
+This report makes four contributions:
 \begin{itemize}
-    \item a prompt-window RPS counterattack demo that preserves the temporal sequence \texttt{rock -> paper -> scissors} and acts only in the final response window;
-    \item a frozen v4 fallback predictor policy for live/demo use, with v7e preserved as diagnostics instead of being promoted after strict-gate failure;
-    \item an actuator-feasible episode criterion that combines prediction, counter selection, remaining time, velocity limits, and joint limits;
-    \item a verified screen-rendered final live take and supporting three-take review artifact.
+    \item a few-shot real RPS skeleton seed dataset extracted from MediaPipe 21-landmark hand tracks;
+    \item a real-guided skeleton augmentation pipeline with compact and large sharded datasets;
+    \item a render-ready SCHUNK/Isaac alignment layer that improves pose-progress quantization over the earlier 8-frame grid;
+    \item a sim-to-real prompt-window counterattack demo using the frozen v4 predictor and actuator feasibility checks.
 \end{itemize}
 
 \section{Related Work}
 
-Early action prediction studies recognition before the full action has been observed. Surveys and skeleton-action-prediction work emphasize that partial observation is a distinct problem from ordinary completed-action recognition \cite{kong2018survey,ke2019latent}. This project uses that framing but narrows the domain to prompt-conditioned hand motion, where the relevant information is not only the final hand shape but also the transition timing.
+Early action prediction differs from ordinary action recognition because the model must decide before the full motion is observed \cite{kong2018survey,ke2019latent}. This project narrows that setting to prompt-conditioned hand motion, where useful evidence is distributed across the transition from a starting fist to the final RPS pose. The final-frame class is not sufficient: the decision must arrive early enough for a robot hand to respond.
 
-The learned predictor is intentionally lightweight. GRU and TCN-style temporal models are natural baselines for short sequential signals because they model temporal context without requiring raw video processing \cite{chung2014gru}. In this project, raw camera frames are used for capture and overlay, while the predictor consumes canonical skeleton features. This follows the project boundary of skeleton ground truth first.
+Skeleton-based temporal models are a practical fit for this setting. GRU and TCN-style models can process short sequential feature vectors without requiring a full raw-video perception stack \cite{chung2014gru}. This is why the project uses MediaPipe to extract 21 landmarks and then trains on canonical skeleton coordinates, velocities, finger-curl values, and motion signals. Selective prediction and calibration ideas also matter, because the system should not issue a counterattack when confidence, margin, or confirmation gates are weak \cite{geifman2017selective,guo2017calibration}.
 
-The system also borrows from selective prediction and calibration. A model should not always act merely because it has a nonzero preferred class. Selective classification and confidence calibration work motivate the use of confidence thresholds, margins, confirmation counts, and response-window gates \cite{geifman2017selective,guo2017calibration}. The final metric then adds an embodied layer: a confident prediction must still be actuator feasible.
-
-Isaac Sim and Isaac Lab provide the target simulation context for articulated robot assets and actuator modeling \cite{isaacsim,isaaclabactuators}. In this submission, archived SCHUNK/Isaac render evidence is used as verified visual material, and the final live demo uses a local SCHUNK-style kinematic renderer as the fallback screen-rendered hand.
+Isaac Sim and Isaac Lab provide the target context for articulated robot assets and actuator modeling \cite{isaacsim,isaaclabactuators}. In this submission, Isaac/SCHUNK work is used as render and robot-response grounding. The final learning path remains skeleton-first, while the SCHUNK-style hand is used to represent the robot response and to check whether a selected counter gesture is actuator feasible.
 
 \section{Method}
 
-\subsection{Prompt-Window Observation}
+\subsection{Real MediaPipe Skeleton Seeds}
 
-Each live take follows a fixed prompt sequence:
-\[
-\texttt{rock} \rightarrow \texttt{paper} \rightarrow \texttt{scissors}.
-\]
-The response window is the final \texttt{scissors} prompt. For the selected final take, the human target gesture is rock, but it is still performed during the final \texttt{scissors} response window. This prevents the clip from becoming a generic gesture video and keeps the temporal structure consistent with the intended demo protocol.
+The first stage records a small real-video seed set and extracts MediaPipe Hands landmarks. The verified seed review contains 20 real clips, split evenly between \texttt{rock\_to\_paper} and \texttt{rock\_to\_scissors}. MediaPipe returned 21 landmarks for every processed frame, giving 720 processed frames and minimum detection coverage of 1.0. Multiple-hand detections were preserved in metadata, but the highest-confidence hand was used as the primary hand.
 
-\subsection{Skeleton Predictor}
+\subsection{Canonical Skeleton Features}
 
-The final live/demo predictor is frozen to v4. The operational config is the rock-guard v4 realtime selector config under \texttt{configs/}. It combines three profile slots:
-\[
-w = [0.25, 0.75, 0.0],
-\]
-corresponding to \texttt{v4\_fewshot\_aug\_tcn}, \texttt{v4\_rebalanced\_tcn}, and \texttt{v4\_final\_gate\_micro}. The third profile is retained in the config surface but has zero live/demo weight. The policy uses confidence threshold $0.70$, margin threshold $0.10$, confirmation count $2$, binary transition threshold $0.60$, and response prompt \texttt{scissors}.
-
-Fig.~\ref{fig:tcn} shows the provided temporal convolution diagram used to explain the sequence model intuition.
+The extracted landmarks are converted into canonical hand-local coordinates. The wrist is the origin, wrist-to-middle-MCP distance defines the primary scale, and the palm axes define a local coordinate frame. Each frame stores canonical 21-point coordinates, velocities, five finger-curl values, five tip-to-MCP distances, five fingertip speeds, and one motion signal. The resulting feature vector has dimension 142. Fig.~\ref{fig:seed} shows a representative canonical seed preview with motion signal and progress checkpoints.
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.85\linewidth]{tcn_temporal_model.png}
-    \caption{Temporal convolutional model intuition for sequence-to-class prediction. The final implementation uses skeleton landmark and velocity features rather than raw images as predictor input.}
+    \includegraphics[width=\linewidth]{canonical_skeleton_seed.png}
+    \caption{Canonical MediaPipe skeleton seed example. Real videos are converted into hand-local skeleton trajectories with motion signal, onset, and progress metadata.}
+    \label{fig:seed}
+\end{figure}
+
+\subsection{Real-to-Sim Skeleton Augmentation}
+
+The canonical real skeleton seeds drive the synthetic expansion stage. A compact bulk dataset generates 2,000 augmented samples, balanced between \texttt{rock\_to\_paper} and \texttt{rock\_to\_scissors}. A larger sharded dataset generates 10,000 samples with a 7,000/1,500/1,500 train/validation/test split. The augmentation is intentionally real-guided: temporal scaling, temporal warping, finger-specific scaling, small rotations, and landmark noise are applied to canonical skeleton trajectories rather than to arbitrary hand drawings.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{real_guided_skeleton_augmentation.png}
+    \caption{Real-guided skeleton augmentation evidence. Few real MediaPipe skeleton seeds are expanded into multiple canonical skeleton trajectories for \texttt{rock\_to\_paper} and \texttt{rock\_to\_scissors}.}
+    \label{fig:augmentation}
+\end{figure}
+
+\subsection{SCHUNK/Isaac Render-Ready Alignment}
+
+The augmented skeleton sequences are aligned to a SCHUNK/Isaac-style robot-hand pose schedule. The older connected-motion evidence used an 8-frame progress grid; the real-guided render-ready alignment prepares a 32-frame schedule with 64 future render-manifest entries, 32 for each transition. This stage does not claim that every sample has a fresh rendered image. Instead, it stores per-frame lookup arrays that make the skeleton dataset ready to consume future SCHUNK render records.
+
+Fig.~\ref{fig:alignment} shows the alignment improvement. The maximum motion-progress quantization error drops from about 0.106 with the old 8-frame grid to about 0.016 with the 32-frame real-guided schedule.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{real_guided_alignment_error.png}
+    \caption{Render-ready alignment improvement. The 32-frame real-guided schedule reduces the maximum motion-progress quantization error relative to the earlier 8-frame SCHUNK progress grid.}
+    \label{fig:alignment}
+\end{figure}
+
+\subsection{Sim-to-Real Counterattack}
+
+After training and validation iterations, the final live/demo predictor is frozen to v4. It uses the rock-guard realtime selector config, profile weights $[0.25, 0.75, 0.0]$, confidence threshold 0.70, margin threshold 0.10, confirmation count 2, and response prompt \texttt{scissors}. v7e is retained as diagnostics only and is not promoted. Fig.~\ref{fig:tcn} shows the temporal convolution style of the sequence predictor as a conceptual model diagram, not as experimental evidence by itself.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.92\linewidth]{tcn_temporal_model.png}
+    \caption{Temporal predictor schematic. The model consumes a sequence of canonical skeleton features and predicts the response-window gesture before the robot-hand deadline.}
     \label{fig:tcn}
 \end{figure}
 
-\subsection{Counter Policy and Actuator Feasibility}
+The live prompt sequence is:
+\[
+\texttt{rock} \rightarrow \texttt{paper} \rightarrow \texttt{scissors}.
+\]
+The human performs the target gesture during the final \texttt{scissors} response window. The counter policy maps human rock to robot paper, human paper to robot scissors, and human scissors to robot rock. The robot starts from rock, waits for a confirmed response-window prediction, and then checks response delay, deadline, velocity, and normalized joint limits before accepting the episode as actuator feasible.
 
-The counter policy is deterministic: rock maps to robot paper, paper maps to robot scissors, and scissors maps to robot rock.
-The robot starts from rock. After a confirmed response-window prediction, the feasibility checker evaluates whether the target counter pose can be reached from rock before the deadline. The final configuration uses a response delay of $0.08$ s, a deadline of $0.50$ s, normalized curl-joint limits $[0,1]$, and the velocity limits from the local kinematic RPS config.
+\section{Experiments}
 
-The episode is counted as a success only if the prediction is correct, the counter move wins, joint limits are satisfied, and the required motion completes before the remaining deadline.
+Table~\ref{tab:dataset} summarizes the real-to-sim dataset path. The key point is that the project does not jump directly from a few real videos to a final demo. It first constructs a verified skeleton representation, then expands it into larger real-guided synthetic datasets.
 
-\section{Implementation}
+\begin{table}[t]
+\caption{Real-Guided Skeleton Dataset Pipeline}
+\label{tab:dataset}
+\centering
+\scriptsize
+\begin{tabular}{p{0.34\linewidth}p{0.24\linewidth}p{0.30\linewidth}}
+\hline
+Stage & Size & Evidence \\
+\hline
+MediaPipe seed review & 20 clips, 720 frames & min detection coverage 1.0 \\
+Canonical seed dataset & 20 sequences & max length 56, feature dim 142 \\
+Compact augmentation & 2,000 samples & 1,000 per transition \\
+Large sharded dataset & 10,000 samples & split 7,000 / 1,500 / 1,500 \\
+Render-ready alignment & 64 manifest entries & 32 frames per transition \\
+\hline
+\end{tabular}
+\end{table}
 
-The implementation is packaged under \texttt{src/embodied\_rps}. The final live recording workflow is exposed through a recording CLI, and the final submission support assets are generated by a separate asset-builder CLI. Exact commands are listed in the repository README.
-This builder writes the dataset inventory, submission manifest, notebook, and report figures. It also rejects two common failure modes: claiming a replay rehearsal video as the final demo and writing local Windows absolute paths into durable submission text.
+Table~\ref{tab:alignment} summarizes the alignment improvement. This table is important because it connects skeleton augmentation to the later robot-hand embodiment. The large skeleton dataset remains usable for skeleton-only training, while the render-ready fields make the same samples compatible with future SCHUNK/Isaac render-conditioned experiments.
 
-Fig.~\ref{fig:schunk} shows verified archived SCHUNK-style render keyframes. These images are reused as visible robot-hand style assets in the final screen-rendered overlay.
+\begin{table}[t]
+\caption{SCHUNK/Isaac Render-Ready Alignment}
+\label{tab:alignment}
+\centering
+\scriptsize
+\begin{tabular}{p{0.38\linewidth}p{0.23\linewidth}p{0.27\linewidth}}
+\hline
+Alignment grid & Max progress error & Role \\
+\hline
+Existing 8-frame grid & about 0.106 & coarse connected-motion reference \\
+Real-guided 32-frame grid & about 0.016 & render-ready alignment layer \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Final Live Validation}
+
+The final live validation tests whether the skeleton predictor transfers back to a real prompt-window camera capture. The selected final take is \texttt{human rock -> robot paper}. During the final \texttt{PROMPT SCISSORS} response window, the system predicts rock and issues robot paper. The actuator feasibility checker reports an actuator-feasible win with 0.4667 s remaining. Fig.~\ref{fig:finaltake} shows the poster frame.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{final_live_candidate_poster.png}
+    \caption{Final sim-to-real counterattack validation. The frozen skeleton predictor is applied back to live prompt-window input and drives an actuator-feasible robot paper response.}
+    \label{fig:finaltake}
+\end{figure}
+
+The robot-hand visuals use archived SCHUNK-style render keyframes as the response pose library, shown in Fig.~\ref{fig:schunk}. These images explain the screen-rendered robot response, but they are not the main evidence for the real-guided data expansion.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.31\linewidth]{schunk_rock_yaw45_pitch20.png}
     \includegraphics[width=0.31\linewidth]{schunk_paper_yaw45_pitch20.png}
     \includegraphics[width=0.31\linewidth]{schunk_scissors_yaw45_pitch20.png}
-    \caption{Verified archived SCHUNK-style render keyframes for rock, paper, and scissors. These are archived evidence images, not newly fabricated report graphics.}
+    \caption{Archived SCHUNK-style response pose library for rock, paper, and scissors. These verified keyframes support the screen-rendered robot response layer.}
     \label{fig:schunk}
 \end{figure}
 
-\section{Results}
-
-Table~\ref{tab:metrics} summarizes the final live/demo policy and diagnostic outcomes. The v4 fallback remains the only live/demo policy. The v7e branch is report evidence only: it improved some paper-transition behavior but failed strict original20 validation and was therefore not promoted.
+Table~\ref{tab:demo} records the final model and demo policy. The v4 fallback remains the live/demo predictor. v7e reached original20 strict validation at 17/20 and is retained only as diagnostic evidence; it is not promoted and v7f retraining is not started.
 
 \begin{table}[t]
-\caption{Final Policy and Demo Metrics}
-\label{tab:metrics}
+\caption{Final Predictor and Live Demo Metrics}
+\label{tab:demo}
 \centering
 \scriptsize
-\begin{tabular}{p{0.27\linewidth}p{0.28\linewidth}p{0.32\linewidth}}
+\begin{tabular}{p{0.29\linewidth}p{0.30\linewidth}p{0.29\linewidth}}
 \hline
 Category & Metric & Value \\
 \hline
 v4 fallback & profile weights & $[0.25,0.75,0.0]$ \\
 v4 fallback & original20 strict & $20/20$ \\
-v4 fallback & heldout15 validation & $11/15$ validation-only \\
+v4 fallback & heldout15 validation & $11/15$, validation-only \\
 v7e diagnostics & original20 strict & $17/20$, not promoted \\
 Final live take & selected take & human rock -> robot paper \\
 Final live take & episode result & actuator-feasible win \\
-Final live take & remaining time & $0.4667$ s \\
+Final live take & remaining time & 0.4667 s \\
 \hline
 \end{tabular}
 \end{table}
 
-The selected final live candidate is shown in Fig.~\ref{fig:finaltake}. It captures the final response window with the human target rock, the frozen v4 decision state, the robot counter paper, and the feasibility status. The visible hand panel uses archived SCHUNK-style render keyframes for the robot response.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{final_live_candidate_poster.png}
-    \caption{Poster frame from the selected final live candidate. The frame shows the \texttt{PROMPT SCISSORS} response window, human target rock, robot counter paper, and feasible actuator result.}
-    \label{fig:finaltake}
-\end{figure}
-
-The three-take review compilation is retained as supporting evidence. It contains the passed selected rock-to-paper take, a diagnostic paper-to-scissors take with no confirmed paper decision, and a diagnostic scissors-to-rock take that confirmed scissors but missed the actuator deadline.
-
 \section{Discussion}
 
-The final result supports the project framing: prediction quality alone is not enough. The selected live take succeeds because the response-window decision arrives early enough for the robot hand to move from rock to paper with time remaining. The failed diagnostic takes are equally important. A no-decision paper take demonstrates that the predictor can abstain or fail to stabilize, while the late scissors take demonstrates that a correct class decision can still fail under actuator timing.
+The most important result is not that a screen-rendered robot hand appears in the final video. The important research path is that a small real skeleton seed set can be converted into a larger real-guided skeleton dataset, aligned to the robot-hand embodiment, and then transferred back to live camera input for a timing-constrained response.
 
-The most important model decision was to preserve v4 as the live/demo fallback. Later v7 branches were useful research diagnostics, but strict validation failures prevented promotion. In particular, v7e reached $17/20$ on original20 after paper-transition rescue but introduced scissors-boundary failures. Promoting it would have weakened the final live demo even though it produced useful negative evidence for future work.
+The project also exposes a limitation. The final training and live/demo path is skeleton-first. The render-ready sidecars prepare the dataset for image- or render-conditioned Isaac experiments, but the final predictor does not learn from raw Isaac camera images. This is an intentional v1 boundary rather than a hidden failure. It keeps the final system verifiable and avoids confusing skeleton prediction with a separate vision-based landmark-estimation problem.
 
-The main limitation is that the final demo is screen-rendered, not a closed-loop physical robot. The archived SCHUNK/Isaac evidence and local kinematic renderer are adequate for the course deliverable, but a future version should run the same prompt-window policy through a full Isaac articulation pipeline and then through real hardware or a higher-fidelity actuator model.
+The counterattack demo remains valuable as an embodied validation target. It forces the temporal predictor to be useful before the prompt window closes and rejects correct but late decisions through actuator feasibility. The failed diagnostic takes are therefore part of the evidence: a model can fail by making no stable decision, by selecting the wrong class, or by deciding too late for the robot to move.
 
 \section{Conclusion}
 
-This project delivers a final live screen-rendered robot counterattack demo built around actuator-constrained early intention prediction. The system preserves the prompt-window temporal assumption, uses a frozen v4 skeleton predictor, maps predictions to counter gestures, checks actuator feasibility, and renders a SCHUNK-style robot response. The final candidate is an actuator-feasible win for human rock -> robot paper, while v7e remains a diagnostic branch rather than a promoted live model. Future work should target the residual paper/scissors boundary and move from the kinematic renderer toward full Isaac Sim articulation and hardware-grounded actuator validation.
+This project implements a real-guided skeleton augmentation pipeline for actuator-constrained RPS counterattack. It starts from 20 real MediaPipe-reviewed clips, builds canonical skeleton seeds, expands them into compact and 10,000-sample real-guided datasets, aligns the data to SCHUNK/Isaac-style pose progress, and validates the frozen v4 predictor back on live prompt-window input. The final robot-hand counterattack is the application-level proof that the prediction and timing policy can drive an actuator-feasible response, while the dataset and alignment pipeline form the central research contribution.
 
 \bibliographystyle{IEEEtran}
 \bibliography{final_report}

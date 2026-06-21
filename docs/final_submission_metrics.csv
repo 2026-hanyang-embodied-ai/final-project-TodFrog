@@ -1,4 +1,9 @@
 section,metric,value,notes
+real seed capture,MediaPipe-reviewed clips,20,720 processed frames; minimum detection coverage 1.0
+canonical seed dataset,feature dimension,142,20 sequences; max sequence length 56
+real-guided augmentation,compact samples,2000,1000 rock_to_paper and 1000 rock_to_scissors
+real-guided augmentation,large sharded samples,10000,split 7000/1500/1500
+render-ready alignment,max progress error,0.016,32-frame real-guided schedule; old 8-frame max about 0.106
 v4 fallback,profile weights,"[0.25, 0.75, 0.0]","fewshot_aug_tcn, rebalanced_tcn, final_gate_micro"
 v4 fallback,original20 strict validation,20/20,from v4 two-stage selector policy source
 v4 fallback,heldout15 validation,11/15,validation-only; not used for training/demo generation

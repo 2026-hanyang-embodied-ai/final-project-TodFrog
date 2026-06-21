@@ -37,6 +37,16 @@ THREE_TAKE_REVIEW_POSTER = Path(
 )
 FINAL_V4_CONFIG = Path("configs/realtime_two_stage_selector_demo_conditional_scissors_rescue_rock_guard.yaml")
 SCHUNK_STYLE_ROOT = Path("artifacts/schunk_joint_target_skeleton_passed")
+CANONICAL_SEED_PREVIEW = Path("artifacts/real_skeleton_canonical_20260610/preview/rock_to_paper_01_canonical_preview.png")
+REAL_GUIDED_AUGMENTATION_PREVIEW = Path(
+    "artifacts/real_skeleton_bulk_aligned_20260610/preview/bulk_augmented_samples_preview.png"
+)
+REAL_GUIDED_ALIGNMENT_ERROR = Path(
+    "artifacts/real_guided_render_ready_bulk_alignment_20260610/preview/progress_error_comparison.png"
+)
+REAL_GUIDED_POSE_SCHEDULE = Path(
+    "artifacts/real_guided_render_ready_bulk_alignment_20260610/preview/real_guided_pose_schedule.png"
+)
 REPORT_TEMPLATE_ROOT = Path("conference-latex-template/IEEE-conference-template-062824")
 DOCS_ROOT = Path("docs")
 NOTEBOOK_PATH = Path("final-project.ipynb")
@@ -201,6 +211,10 @@ def copy_verified_report_figures(
     copy_plan = {
         "final_live_candidate_poster": FINAL_LIVE_POSTER,
         "three_take_review_poster": THREE_TAKE_REVIEW_POSTER,
+        "canonical_skeleton_seed": CANONICAL_SEED_PREVIEW,
+        "real_guided_skeleton_augmentation": REAL_GUIDED_AUGMENTATION_PREVIEW,
+        "real_guided_alignment_error": REAL_GUIDED_ALIGNMENT_ERROR,
+        "real_guided_pose_schedule": REAL_GUIDED_POSE_SCHEDULE,
         "schunk_rock_yaw45_pitch20": SCHUNK_STYLE_ROOT / "rock_view_yaw45_pitch20.png",
         "schunk_paper_yaw45_pitch20": SCHUNK_STYLE_ROOT / "paper_view_yaw45_pitch20.png",
         "schunk_scissors_yaw45_pitch20": SCHUNK_STYLE_ROOT / "scissors_view_yaw45_pitch20.png",
@@ -323,6 +337,21 @@ def write_submission_manifest(
         "status": "passed",
         "repository": "https://github.com/2026-hanyang-embodied-ai/final-project-TodFrog",
         "project_title": "Actuator-Constrained Early Intention Prediction for Simulated Rock-Paper-Scissors Robot Hands",
+        "research_focus": (
+            "few-shot real MediaPipe skeleton capture -> real-guided skeleton "
+            "augmentation/alignment -> sim-to-real live counterattack validation"
+        ),
+        "pipeline_evidence": {
+            "real_clips": 20,
+            "processed_frames": 720,
+            "canonical_sequences": 20,
+            "feature_dimension": 142,
+            "compact_augmented_samples": 2000,
+            "large_sharded_samples": 10000,
+            "large_split": [7000, 1500, 1500],
+            "alignment_frames_per_transition": 32,
+            "aligned_manifest_entries": 64,
+        },
         "final_live_candidate": {
             "video": FINAL_LIVE_VIDEO.as_posix(),
             "poster": FINAL_LIVE_POSTER.as_posix(),
@@ -365,8 +394,16 @@ def write_final_project_notebook(*, project_root: Path) -> Path:
         "cells": [
             _markdown_cell(
                 "# Final Project: Actuator-Constrained Early Intention Prediction\n\n"
-                "This notebook summarizes the verified final submission artifacts and shows the commands used to validate the live/demo path.",
+                "This notebook summarizes the verified real-to-sim-to-real skeleton pipeline, final submission artifacts, and validation commands.",
                 cell_id="overview",
+            ),
+            _markdown_cell(
+                "## Dataset Pipeline\n\n"
+                "- Real seed capture: 20 MediaPipe-reviewed clips and 720 processed frames\n"
+                "- Canonical representation: 20 sequences with 142-dimensional per-frame features\n"
+                "- Real-guided expansion: 2,000 compact samples and 10,000 large sharded samples\n"
+                "- Sim-to-real validation: frozen v4 predictor applied back to prompt-window live capture.",
+                cell_id="dataset-pipeline",
             ),
             _markdown_cell(
                 "## Final Demo Policy\n\n"
@@ -472,23 +509,25 @@ def _validate_final_video_paths(project_root: Path) -> None:
 
 
 def _write_system_pipeline_diagram(path: Path) -> None:
-    width, height = 1600, 520
+    width, height = 1600, 420
     image = Image.new("RGB", (width, height), (248, 250, 252))
     draw = ImageDraw.Draw(image)
-    font = ImageFont.load_default()
-    title = "Verified final system pipeline"
-    draw.text((40, 28), title, fill=(15, 23, 42), font=font)
+    title_font = _load_diagram_font(30)
+    label_font = _load_diagram_font(24)
+    footer_font = _load_diagram_font(18)
+    title = "Real-to-sim-to-real skeleton pipeline"
+    draw.text((40, 28), title, fill=(15, 23, 42), font=title_font)
     boxes = [
-        ("Prompt window\nrock -> paper -> scissors", (40, 130, 270, 290), (219, 234, 254)),
-        ("MediaPipe\n21 landmarks", (310, 130, 510, 290), (220, 252, 231)),
-        ("Frozen v4\nTCN ensemble", (550, 130, 740, 290), (254, 249, 195)),
-        ("Counter policy\nR->P P->S S->R", (780, 130, 1010, 290), (255, 237, 213)),
-        ("Actuator check\n0.50s deadline", (1050, 130, 1250, 290), (237, 233, 254)),
-        ("SCHUNK-style\nscreen render", (1290, 130, 1530, 290), (229, 231, 235)),
+        ("Few real\nRPS videos", (40, 120, 245, 285), (219, 234, 254)),
+        ("MediaPipe\n21 landmarks", (285, 120, 490, 285), (220, 252, 231)),
+        ("Canonical\nskeleton seeds", (530, 120, 735, 285), (254, 249, 195)),
+        ("Real-guided\naugmentation", (775, 120, 980, 285), (255, 237, 213)),
+        ("TCN predictor\nsim-to-real", (1020, 120, 1225, 285), (237, 233, 254)),
+        ("Actuator-feasible\nrobot response", (1265, 120, 1530, 285), (229, 231, 235)),
     ]
     for index, (label, box, color) in enumerate(boxes):
         draw.rounded_rectangle(box, radius=12, fill=color, outline=(71, 85, 105), width=2)
-        _center_multiline(draw, label, box, font=font)
+        _center_multiline(draw, label, box, font=label_font)
         if index < len(boxes) - 1:
             x2 = box[2]
             next_x1 = boxes[index + 1][1][0]
@@ -496,17 +535,18 @@ def _write_system_pipeline_diagram(path: Path) -> None:
             draw.line((x2 + 12, y, next_x1 - 12, y), fill=(30, 41, 59), width=3)
             draw.polygon([(next_x1 - 12, y), (next_x1 - 28, y - 8), (next_x1 - 28, y + 8)], fill=(30, 41, 59))
     draw.text(
-        (40, 390),
-        "Figure is a schematic built from verified project artifacts; it is not a fabricated fresh Isaac Sim screenshot.",
+        (40, 350),
+        "Schematic built from verified project artifacts; not a fabricated fresh Isaac Sim screenshot.",
         fill=(71, 85, 105),
-        font=font,
+        font=footer_font,
     )
     image.save(path)
 
 
 def _center_multiline(draw: ImageDraw.ImageDraw, text: str, box: tuple[int, int, int, int], *, font: ImageFont.ImageFont) -> None:
     lines = text.splitlines()
-    line_h = 16
+    bbox = draw.textbbox((0, 0), "Ag", font=font)
+    line_h = (bbox[3] - bbox[1]) + 8
     total_h = line_h * len(lines)
     y = box[1] + ((box[3] - box[1]) - total_h) // 2
     for line in lines:
@@ -515,6 +555,15 @@ def _center_multiline(draw: ImageDraw.ImageDraw, text: str, box: tuple[int, int,
         x = box[0] + ((box[2] - box[0]) - line_w) // 2
         draw.text((x, y), line, fill=(15, 23, 42), font=font)
         y += line_h
+
+
+def _load_diagram_font(size: int) -> ImageFont.ImageFont:
+    for name in ("arial.ttf", "DejaVuSans.ttf", "LiberationSans-Regular.ttf"):
+        try:
+            return ImageFont.truetype(name, size=size)
+        except OSError:
+            continue
+    return ImageFont.load_default()
 
 
 def _markdown_cell(source: str, *, cell_id: str) -> dict[str, object]:
@@ -563,6 +612,11 @@ def write_metrics_csv(path: Path) -> None:
     """Write compact final-report metrics table used by README/report."""
 
     rows = [
+        ("real seed capture", "MediaPipe-reviewed clips", "20", "720 processed frames; minimum detection coverage 1.0"),
+        ("canonical seed dataset", "feature dimension", "142", "20 sequences; max sequence length 56"),
+        ("real-guided augmentation", "compact samples", "2000", "1000 rock_to_paper and 1000 rock_to_scissors"),
+        ("real-guided augmentation", "large sharded samples", "10000", "split 7000/1500/1500"),
+        ("render-ready alignment", "max progress error", "0.016", "32-frame real-guided schedule; old 8-frame max about 0.106"),
         ("v4 fallback", "profile weights", "[0.25, 0.75, 0.0]", "fewshot_aug_tcn, rebalanced_tcn, final_gate_micro"),
         ("v4 fallback", "original20 strict validation", "20/20", "from v4 two-stage selector policy source"),
         ("v4 fallback", "heldout15 validation", "11/15", "validation-only; not used for training/demo generation"),

@@ -1,8 +1,18 @@
 # Actuator-Constrained Early Intention Prediction for Simulated RPS Robot Hands
 
-This project studies a simulated robot-hand counterattack task for Rock-Paper-Scissors. The goal is not only to classify a completed hand pose. The system observes a prompt-window hand-motion sequence, predicts the opponent's final gesture early, selects the winning counter gesture, and checks whether a simulated SCHUNK-style hand can execute the response before the actuator deadline.
+This project studies a skeleton-first real-to-sim-to-real pipeline for Rock-Paper-Scissors early intention prediction. A small number of real hand-motion videos are converted into MediaPipe 21-landmark skeleton trajectories, canonicalized, expanded through real-guided synthetic skeleton augmentation, aligned to SCHUNK/Isaac-style robot-hand pose progress, and transferred back to live camera input.
 
-## Final Demo Status
+The simulated robot-hand counterattack is the final application and validation target. The core research contribution is the data and timing pipeline: scarce real skeleton seeds are expanded into a larger synthetic skeleton training set, then a temporal predictor is tested under a prompt-window actuator deadline.
+
+## Research Pipeline
+
+- Real seed capture: `20` reviewed RPS transition clips and `720` processed frames with MediaPipe hand detection coverage `1.0`.
+- Canonical representation: `20` skeleton sequences with `142` temporal feature dimensions and max sequence length `56`.
+- Real-guided augmentation: `2,000` compact samples and `10,000` large sharded samples derived from real skeleton seeds.
+- Render-ready alignment: 32-frame SCHUNK/Isaac-style pose-progress alignment, reducing max progress error from about `0.106` to about `0.016`.
+- Sim-to-real validation: frozen v4 temporal predictor applied back to live prompt-window capture, then checked by actuator feasibility before the robot counterattack is accepted.
+
+## Final Sim-to-Real Demo Status
 
 - Live/demo predictor: frozen v4 fallback policy.
 - Final live candidate: `artifacts/final_submission_live_counterattack_recording_prompt_scissors_retake_20260619/selected_final_submission_take/final_submission_live_counterattack.mp4`
@@ -44,9 +54,9 @@ python -m pip install -e .[dev]
 
 For the live camera demo path, the local environment also needs a working camera and the OpenCV/MediaPipe stack installed by the package dependencies.
 
-## Reproduce The Final Demo Artifacts
+## Reproduce The Final Submission Artifacts
 
-The final live candidate was already recorded. To regenerate documentation/report support files from the verified local artifacts:
+The final live candidate was already recorded. To regenerate documentation/report support files from the verified local artifacts, including the real-guided skeleton figures and final report manifest:
 
 ```powershell
 $env:PYTHONPATH='src'
@@ -105,7 +115,7 @@ v7e is preserved as a diagnostic branch only. It reached original20 strict valid
 
 See `docs/dataset_inventory.md`.
 
-Upload-ready local roots include:
+Upload-ready local roots include the core real-guided skeleton datasets and diagnostic follow-up datasets:
 
 - `artifacts/real_guided_training_package_20260610/`
 - `artifacts/real_guided_large_sharded_20260610/`

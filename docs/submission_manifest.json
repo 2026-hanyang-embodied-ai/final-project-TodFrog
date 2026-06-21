@@ -2,6 +2,22 @@
   "status": "passed",
   "repository": "https://github.com/2026-hanyang-embodied-ai/final-project-TodFrog",
   "project_title": "Actuator-Constrained Early Intention Prediction for Simulated Rock-Paper-Scissors Robot Hands",
+  "research_focus": "few-shot real MediaPipe skeleton capture -> real-guided skeleton augmentation/alignment -> sim-to-real live counterattack validation",
+  "pipeline_evidence": {
+    "real_clips": 20,
+    "processed_frames": 720,
+    "canonical_sequences": 20,
+    "feature_dimension": 142,
+    "compact_augmented_samples": 2000,
+    "large_sharded_samples": 10000,
+    "large_split": [
+      7000,
+      1500,
+      1500
+    ],
+    "alignment_frames_per_transition": 32,
+    "aligned_manifest_entries": 64
+  },
   "final_live_candidate": {
     "video": "artifacts/final_submission_live_counterattack_recording_prompt_scissors_retake_20260619/selected_final_submission_take/final_submission_live_counterattack.mp4",
     "poster": "artifacts/final_submission_live_counterattack_recording_prompt_scissors_retake_20260619/selected_final_submission_take/poster_frame.png",
@@ -21,6 +37,10 @@
     "figures": {
       "final_live_candidate_poster": "conference-latex-template/IEEE-conference-template-062824/figures/final_live_candidate_poster.png",
       "three_take_review_poster": "conference-latex-template/IEEE-conference-template-062824/figures/three_take_review_poster.png",
+      "canonical_skeleton_seed": "conference-latex-template/IEEE-conference-template-062824/figures/canonical_skeleton_seed.png",
+      "real_guided_skeleton_augmentation": "conference-latex-template/IEEE-conference-template-062824/figures/real_guided_skeleton_augmentation.png",
+      "real_guided_alignment_error": "conference-latex-template/IEEE-conference-template-062824/figures/real_guided_alignment_error.png",
+      "real_guided_pose_schedule": "conference-latex-template/IEEE-conference-template-062824/figures/real_guided_pose_schedule.png",
       "schunk_rock_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_rock_yaw45_pitch20.png",
       "schunk_paper_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_paper_yaw45_pitch20.png",
       "schunk_scissors_yaw45_pitch20": "conference-latex-template/IEEE-conference-template-062824/figures/schunk_scissors_yaw45_pitch20.png",
